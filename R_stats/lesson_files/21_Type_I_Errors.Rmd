@@ -1,0 +1,271 @@
+---
+title: "Hypothesis Testing Errors"
+subtitle: "C'mon... what could go wrong?"
+author: "P. Lombardo"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Loading packages, data, and helper functions
+```{r echo =F, message = F, warning = F}
+library(tidyverse)
+library(patchwork)
+library(DescTools)
+library(broom)
+source("source_files/HT_errors_ANOVA.R")
+```
+
+## Hypothesis Testing Errors
+Every hypothesis test is in danger of making one of two mistakes:
+
+1. We could decide to reject the null hypothesis because the $P$-value is less than $\alpha$, *when in reality the null hypothesis is correct.*
+    * These are called *Type I Errors*.
+
+2. We could fail to reject the null hypothesis because the $P$-value is more than $\alpha$, *when in reality the null hypothesis is false.*
+    * These are called *Type II Errors.*
+    
+Today, we will focus on ***Type I Errors*** and return to the other kind of mistake at a later lesson.
+
+Just to reiterate, a Type I Error occurs when the results of our hypothesis test ***incorrectly tell us to reject $H_0$***. 
+
+* In other words, the null hypothesis is *actually* true, but because of unfortunate luck we collected a sample that gave us evidence to reject $H_0$.
+
+> **EVERY HYPOTHESIS TEST IS IN DANGER OF MAKING THIS MISTAKE**
+
+Naturally, of course, we want to minimize the *likelihood* of this occurring. Good news, it's pretty easy to do, so let's start exploring.
+
+### Type I Error rates
+The `HT_errors_ANOVA` script loads two important functions for this section:
+
+* `pvalue_sim(null_mu, n, sigma)`
+    * This runs 2,000 hypothesis tests where $H0: \mu = $`null_mu` using a sample of size of `n`. 
+    * The samples are drawn *from a normal population with a mean of 100* and standard deviation `sigma`.
+    * The function returns a vector of $P$-values from these hypothesis tests.
+
+* `hist_with_alpha(pvals, alpha)`: 
+    * This generates a quick visual for looking at the simulated $P$-values from our other function.  
+    * Over a histogram of the $P$-values in blue, it also marks the significance level we chose with a vertical red line.
+
+Let's use the `pvalue_sim(null_mu, n, sigma)` to explore a little further.
+
+Recall that a Type I Error involves means we incorrectly rejected a true null hypothesis.  ***Since our function is set up to sample from a population with a mean of 100,*** to make the null hypothesis true we set `null_mu = 100` when we simulate our $P$-values. 
+
+> By setting `null_mu=100`, we are choosing to make the null hypothesis *actually* true!  This is a very important point, because now any $P$-value below 0.05 would lead to a Type I error.
+
+Let's begin by assuming we use a sample size of `n=30` and the population standard deviation is `sigma= 15`.  Use `pvalue_sim()` to generate some simulated $P$-values, and save it under `pvals`:
+```{r}
+# Place code here.
+```
+
+**What percentage of these simulated $P$-values would lead us to *reject* our null hypothesis?**  Assume $\alpha = 0.05$.
+```{r}
+#Place code here.
+```
+
+This value above is essentially an estimated *Type I Error Rate* for this hypothesis test. In the code below, estimate the Type I Error Rate for different values of $\alpha$, say 0.10, 0.03, and 0.01.
+
+```{r}
+# Place code here.
+```
+What do you notice?
+
+<answer here>
+
+*** 
+
+Let's visualize our $P$-values when our null hypothesis is the same as the actual population mean (i.e., the *null hypothesis is true in reality*). We use `hist_with_alpha(pvals, alpha)`
+
+```{r}
+hist_with_alpha(pvals,0.05)
+```
+
+**What do you notice about the *shape* of the histogram for $P$-values when the null hypothesis is true?**
+
+<answer here>
+
+***
+
+### What effects Type I Error Rates?
+
+Let's explore the effect of sample size (`n`) and population standard deviation (`sigma`) on our estimated Type I error rate. To facilitate this, use the helper function `typeI_rate(n,sigma,alpha)` to quickly estimate our Type I Error Rate.
+
+**How does the Type I error rate change when we alter `n`?**
+
+Try $n = 10, 30, 50, 100$.
+```{r}
+#Place code here.
+
+# Show sapply?
+```
+
+<answer here>
+
+**How does the Type I error rate change when we alter `sigma`?**
+
+Try $\sigma = 5, 20, 35, 105$.
+```{r}
+#Place code here.
+```
+
+<Answer here>
+
+**How does the Type I error rate change when we change `alpha`?**
+```{r}
+# Place code here.
+```
+
+<answer here.>
+
+***
+
+You can use this [$P$-value distribution](https://stem.endicott.edu/pl-shiny/power/p-vals-distribution/) interactive visualization to explore these ideas as well.  The simulator draws samples from a population with a mean of 100 (as our example above), so leaving the null hypothesis bar at 100 will let you explore Type I errors.
+
+***
+
+
+# Why do we care about Type I Errors?
+
+![Credit: xkcd.com, [significant](https://xkcd.com/882/)](images/significant.png)
+
+## Problems with multiple testing
+Multiple testing can be problematic in many cases. But as indicated by the sage comic xkcd, multiple testing naturally arises when people keep making extraneous and comparisons until the find something.  The point here is that you *will* eventually get a small $P$-value, ***even if the null hypothesis you are testing is correct!***
+
+To prove this point, let's consider a simulation that uses a difference of means hypothesis test where both samples are pulled from the same population; hence, the "population means" are in fact equal.
+
+Below, we run 50 hypothesis tests where our samples are drawn from a normal populations with the same mean.  To keep it simple, we draw two samples of size 30 from the standard normal distribution:
+```{r}
+# Let's collect some P-values and see how many
+# are below 0.05 (resulting in a type I error)
+set.seed(884422)
+pvals<-sapply(1:50, two_sample_get_p)
+
+#how many pvals would have us *falsely* reject H_0?
+sum(pvals<0.05)
+```
+By running 50 hypothesis tests, we found ______ "statistically different means" when ideally we should have found ***none!***  Both samples were drawn from a population with a mean of 0!
+
+Of course we should expect *some* of these hypothesis tests to tell us to reject $H_0$. These are essentially Type I errors, and they should occur about 5\% of the time as we run hypothesis tests against a *true* null hypothesis. 
+
+#### OK, so what's the problem then?
+
+The problem arises when we *group these tests together* to answer a bigger picture question. 
+
+Suppose we have ten populations, and we want to see if at least one of them has a different mean. We are, in essence, testing a single hypothesis hoping to reject it:
+
+> Big Null Hypothesis: *All the group means are equal.*
+
+One way to approach this is to compare all potential pairs of population:
+
+* Pop 1 vs Pop 2;
+* Pop 1 vs Pop 3;
+* ...
+
+Now, if ***any one*** of these two-by-two comparisons come back with a $P$-value under $\alpha$, we would reject the "Big $H_0$".  Seems reasonable, right?
+
+I agree, it does seem reasonable. But before we pat ourselves on the back, maybe we should be concerned about Type I Errors affecting this process.
+
+* Doing pair-wise testing for 10 populations involves 10-choose-2 = 45 hypothesis tests. 
+* With a Type I Error rate of 0.05 (since that's our significance level), how many "small $P$-values" should we expect even if all the group means *are in fact equal?*
+
+```{r}
+# place code here.
+```
+
+#### A simulation
+We will run a simulation below where we plan to test a "Big Null Hypothesis" $$\text{Big} \ H_0: \mu_1 = \mu_2 = ... = \mu_{10}.$$
+We will reject the "Big $H_0$" when ***at least one*** of the pairwise tests has a $P$-value below 0.05.  
+
+What's the Type I error rate for this "Big $H_0$" above? Let's see.
+
+* The code below runs "block test", meaning 45 comparisons, where the group means *are in fact all equal*.
+* If any of the individual comparisons has a $P$-value under 0.05, we would plan to *reject* the Big $H_0$. In such cases, we record a `rejectBigH0` in the storage vector `reject`.
+    * ***Therefore, each `rejectBigH0` in `reject` corresponds to a Type I Error rate for our pair-wise testing protocol.***
+
+(Note: to keep your computer from taking too long to run these loops, we're only going to collect 200 runs of 45-test blocks; in theory we should do more to get a more accurate estimate of the Type I Error Rate.)
+```{r}
+set.seed(31415)
+reject<-logical(200)
+for (i in 1:200){
+    # This code runs a block of 45 tests and
+    # collects P-values
+    block45<-sapply(1:45,two_sample_get_p)
+    
+    # Store TRUE/FALSE based on *at least one* pval under 0.05
+    reject[i]<- ifelse(sum(block45<0.05) >= 1,
+                              "rejectBigH0",
+                              "FailToReject")
+}
+```
+
+What percentage of the 45-block tests had *at least one* $P$-value below 0.05? 
+```{r}
+# Place code here
+```
+
+
+
+***This implies that using a pair-wise approach for testing $$H_0: \mu_1 = \mu_2 = ... = \mu_{10}$$
+would have a type 1 error rate of about _____. That's insane, and completely irresponsible.***
+
+As a point of comparison, we can compute the probability that we get at least one head by flipping a coin 45 times where the probability of heads is 0.05.  *Do you see the connection here?*
+```{r}
+1- pbinom(0,45,.05)
+```
+
+
+### Great, so how do we compare the means of more than two populations?
+We use Analysis of Variance (ANOVA).  Yes, variation, somehow, tells us something about means, but we're going to skip the theory for now and just verify that this fixes our Type I Error rate problem.
+
+Let's consider our same situation as above: we have 10 different samples of size 30 from a standard normal distribution.  Let's test the null hypothesis $$H_0: \mu_1 = \mu_2 = ... =\mu_{10}$$
+
+The code below uses an ANOVA instead of pair-wise comparisons to look for evidence to reject the "Big $H_0$" that all the means are equal.  We set this up so that all the population means *are* the same, so the ANOVA should be returning $P$-values *above* 0.05, generally.
+
+Let's observe this by running the test several times (hit the play button a bunch).
+```{r}
+#What does the code below do?
+samples_df<-data.frame(
+    measurements=rnorm(10*30),
+    sample_num=rep(paste("Samp",1:10,sep=""),30)
+)
+# samples_df
+fit1<-aov(measurements~sample_num, 
+          data = samples_df)
+fit1 %>% tidy() %>% select(p.value)
+```
+
+So what would happen if we ran the ANOVA above 500 times? If the ANOVA fixes the error rate problem, we should see "Big $H_0$" rejected only about 5\% of the time. 
+
+Let's simulate the Type I Error rate for the ANOVA. The code below collects 500 runs of an ANOVA using our populations with all equal means. It stores the $P$-values for these runs in the `pvals_anova` vector, which we will explore after running the simulation.
+```{r}
+pvals_anova<-logical(500)
+for (i in 1:500){
+    # generate a data frame with 10 samples of size 30
+    # all from the standard normal distribution.
+    samples_df<-data.frame(
+        measurements=rnorm(10*30),
+        sample_num=rep(paste("Samp",1:10,sep=""),30)
+    )
+    
+    # Let's fit an anova and extract it's P-value
+    fit1<-aov(measurements~sample_num, data = samples_df)
+    s<-summary(fit1)
+    pvals_anova[i]<-unlist(s)['Pr(>F)1']
+}
+```
+
+What is our Type I error rate when we use ANOVA to test for a difference in means among 10 samples?
+
+```{r}
+#place code here
+```
+
+Pretty good!
+
+## Conclusions
+
+Type I Errors are inevitable, but can be "controlled" by setting a significance value that you are comfortable with as a researcher.  Will you still make a Type I Error from time to time? Yes, but hopefully only about 5\% of the time.
+
+We also explore the dangers of "multiple testing," as highlighted by pair-wise testing for differences in means among several populations.  A hypothesis test called an ANOVA can fix this approach, but we will want to learn how to use it properly. 
+
+And that's where we're heading next...

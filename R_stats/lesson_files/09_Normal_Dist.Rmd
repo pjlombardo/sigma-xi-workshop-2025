@@ -1,0 +1,161 @@
+---
+title: "The Normal Distribution"
+author: "P. Lombardo"
+output:
+  html_document: default
+---
+
+## Loading packages and data
+```{r}
+library(tidyverse)
+library(patchwork)
+set.seed(234)
+bank<-data.frame(savings = round(rnorm(1000,2100,150),2))
+source('source_files/general.R')
+source('source_files/normal_1.R')
+```
+
+## Modeling Sampling Distributions
+In our last lesson, we learned about sampling distributions for a statistic and discovered that they reveal three important "aggregate behaviors" for statistics generated from random samples. However, there is still one pretty glaring shortcoming of this process:
+
+> Any situation where we could generate a sampling distribution to understand the "aggregate behavior" would require us knowing the all the population information in the first place. So...
+
+Yes. That is a problem. So, practically speaking, generating a sampling distribution won't work for us. 
+
+*Luckily for us*, there is a beautiful theorem from probability that essentially gives us access to decent models for common sampling distributions: ***The Central Limit Theorem.*** But before we can talk about that, we need to learn about *The Normal Distribution* and how it works as a probability  model.
+
+## Probability Models
+
+***
+
+*Caveat:* My treatment of probability and random variables here is more intuitive than it is formal. I'm trying to emphasize ways to *think* about these things, rather that shooting for mathematical accuracy and precision.
+
+***
+
+We will think of a *probability model* as a tool that makes predictions. 
+
+* We will consider a model **good** if the probability it reports matches with the relative frequency of an measurement after collecting a lot of data.  
+* With  **bad** model, this probability prediction is quite different from the relative frequencies we get from collecting a lot of data.
+
+Remember the example from the reading.  If a coin is a fair coin, then a *good* probability model would involve one that predicts the probability of heads is 0.5 and the same for tails.  We can verify if this is a good model by flipping a coin 10,000 times and looking at the relative frequency of heads.
+
+### The Normal Distribution
+This is a *continuous probability model*, so here's the scoop:
+
+> Basic idea: 
+>
+> * the space is a continuous interval ($x$-axis), and
+> * Area Under Curve == Probabilities.
+
+The normal distribution predicts the probability that measurement ($X$) will fall in a certain region of the $x$-axis.  For example, the probability a measurement $X$ will be less than or equal to 3: $P(X\leq3)$.
+
+For the normal distributions, we also know:
+
+* its "bell-shaped" and symmetric;
+* we can control the location of the peak by adjusting the $\mu$ parameter;
+* we can adjust how "spread out" the probabilities are using the $\sigma$ parameter.
+
+Let's look at this visually first with a [Shiny App](https://stem.endicott.edu/pl-shiny/probability-distributions/norm-distr-explore/).
+
+### Application to savings accounts
+The `bank` data frame contains the amounts in the **savings** accounts for a large collection of people. Let's explore how a "good" normal probability model can make predictions about relative frequencies.
+
+Let $X$ represent a measurement, so the amount in the savings account of a person at the bank. Use a normal distribution to model $X$, and assume it has parameters $\mu = 2100$ and $\sigma = 150$.
+
+Let's compare $P(X\leq 2000)$ with the relative frequency of people with **savings** balances less than \$2,000.
+```{r}
+# Relative frequency:
+sum(bank$savings <= 2000)/nrow(bank)
+
+# Probability?
+# Yes, R has a function for that: pnorm()
+
+```
+
+1. *How did they compare? Is our normal distribution a "good model"?*
+
+2. *Try the comparison above, but change the value we are less than from 2000 to a different number, like 2200, or 1900. Is the model still working well? (Remember to adjust your `pnorm()` function as well.*
+
+We can visualize this as well. The pre-loaded plot below overlays the probability model with
+```{r}
+cplot
+```
+
+So rather than using the histogram bars to determine a relative frequency, we can just compute area under the normal probability curve:
+```{r}
+norm_vis(2000, mu = 2100, sigma = 150, tail="lower")
+```
+
+#### A bad model
+Now consider a normal random variable model where $\mu = 2200$ and $\sigma = 200$.
+
+* Once again, compare $P(X\leq 2000)$ with the relative frequency of people with **savings** balances less than \$2,000.
+```{r}
+# Relative frequency:
+sum(bank$savings <= 2000)/nrow(bank)
+
+# Probability?
+# Remember to update your parameters for pnorm so mu = 2200 and sigma = 200
+pnorm(2000, 2200, 200)
+```
+How does it look?
+```{r}
+cplot_bad
+```
+
+
+## Using `pnorm()` to compute probabilities
+For statistics, we typically care about computing three "types" of probabilities.
+
+1. $P(X\leq a)$ (a lower tail):  Here, `pnorm()` is already set up to work for us. We simply use `pnorm(a, mu, sigma)`, where `mu` and `sigma` are the parameters we chose for our model.
+
+2. $P(X\geq a)$ (an upper tail): Since `pnorm()` only computes "less than" probabilities; we have to use use an equality I call the "one minus trick": $$P(X\geq a) = 1 - P(X\leq a).$$ Hence, for "greater than" probabilities, we use `1 - pnorm(a, mu, sigma)`.
+
+3. $P(a \leq X \leq b)$ (a "middle area"): A similar argument as above leads us to the "big minus little trick: $$P(a\leq X \leq b) = P(X\leq b) - P(X\leq a).$$ Hence, for "middle area" probabilities, we use `pnorm(b,mu,sigma) - pnorm(a,mu,sigma)`.
+
+
+Let's practice our probability computations while verifying that a normal distribution is a good model for the savings account values. Remember our "good" parameters were $\mu = 2100$ and $\sigma = 150$.
+
+
+**Exercise 1.** Find the rel. frequency of accounts with savings that are between \$2,000 and \$2,300.  Then, compute the analogous probability using our assumed normal r.v. model.
+```{r}
+# rel. frequency
+
+# probability using the normal rv model
+
+```
+
+
+**Exercise 2.** Find the rel. frequency of savings accounts with more than \$2,250.  Then, compute the analogous probability using our assumed normal r.v. model.
+```{r}
+# rel. frequency
+
+# probability using the normal rv model
+
+```
+
+**Main Idea:** Assuming you have parameters that lead to a "good model"... 
+
+* *how well did the normal model do at "predicting" the rel. frequencies in our sampling distribution?*  
+* What did you notice in the comparisons between probabilities and rel. frequencies above?
+
+<place answer here>
+
+
+
+## Summary!
+Here's the big idea.  If data has a normal shape, then with the right choice of parameters for `mu` and `sigma` we can use a *normal random variable* to effectively replace having the data set.  This may be beneficial because:
+
+* The normal distribution is a theoretical construct; it does not require any arduous sampling loops, computational strength, or **even access to data**!
+
+* The probabilities coming from our normal distribution model can give us pretty accurate estimates of important information about the underlying data it models. Specifically:
+    * `mu` is essentially the mean of the data;
+    * `sigma` is essentially the standard deviation of the data;
+    * the *percentiles* of the data correspond to the percentiles of the normal distribution; and
+    * the rel. frequencies of data falling in a certain region correspond to the probability of the same region for our normal random variable.
+    
+So how will we use all this?
+
+> The Central Limit Theorem shows that under certain assumptions, the sampling distributions for means and percentages have a normal distribution. Moreover, ***it provides formulas for the $\mu$ and $\sigma$ parameters!***
+
+This means rather than generating a sampling distribution, we can just apply the Central Limit Theorem to glean the "aggregate" information we need about the sampling distribution.

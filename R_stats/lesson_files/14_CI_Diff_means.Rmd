@@ -1,0 +1,137 @@
+---
+title: "Comparing Means Between Groups"
+subtitle: "Two at a time please!"
+author: "P. Lombardo"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Loading packages, etc.
+```{r}
+library(tidyverse)
+library(patchwork)
+# library(DescTools)
+library(broom)
+fish <- read.csv('data/fish.csv', header = T, stringsAsFactors = T)
+```
+
+## Theory
+As it turns out, the Central Limit Theorem applies to sampling distributions of some other statistics as well!  Two commonly used ones are
+
+1. The difference of sample means from two populations: $\bar x_1 - \bar x_2$.
+2. The different of sample percentages from two populations: $\hat p_1 - \hat p_2$.
+
+[**Shiny Visualization!**](https://stem.endicott.edu/pl-shiny/sampling-distributions/difference-in-means-sampdist/)
+
+Again, I'll spare you the formulas for the standard errors, and we won't really discuss the potential "tweaks" commonly made after the fact.  However, the idea is the same: 
+
+> When sample sizes are large enough (in each sample), the sampling distribution for a difference of means (or percentages) for two populations will have a reasonably normal distribution with a formula for the standard error, and the mean equal to the *difference of population means (or percentages)*. 
+
+This is great, because if we can say something about how the difference of means behaves, we can compare them.  What, don't believe me!?!
+
+Well, if $\mu_1 - \mu_2$ is positive, then $\mu_1 - \mu_2 >0$, so solving for $\mu_1$ gives: $$\mu_1 > \mu_2.$$
+
+In fact, all the usual comparisons for two groups parameters (means or percentages) can be reduced to a statement of how *the difference of the parameters* compares against zero. It is useful to be able to toggle between these two equivalent viewpoints easily, so ... well... practice it!
+
+##  The `ToothGrowth` data set
+
+The `ToothGrowth` data set comes from an experiment looking to explore the effect of vitamin C on the tooth growth of Guinea pigs. Let's explore a little.
+```{r}
+#place code here
+?ToothGrowth
+```
+
+
+### A Confidence Interval Example
+Let's consider a specific dose, 2.0 mg/day, and use a confidence interval to explore whether OJ or VC leads to a higher population mean tooth growth.
+
+0. We are given more data than we actually need, so let's do some data manipulation so that we use only a dataframe with the necessary variables and rows.
+```{r}
+# Modify the ToothGrowth data frame.
+```
+
+
+We are considering a difference of means, $\mu_1 - \mu_2$, so *it matters which mean comes first!* 
+
+1. Who is group 1? Let's run a levels command to see which comes first. (It's typically alphabetical, so you can rely on that instead....)
+
+```{r}
+#place code here.
+```
+
+*What parameter are we estimating? (Make the order clear.)*
+
+2. Assumptions for this test?
+
+* Either each group has at least 30 observations, or it is safe to assume we are sampling from two normal populations.
+```{r}
+# check sample sizes...
+```
+
+* Is the variation of the response variable about the same for each group? (Three-fold rule...)
+```{r}
+# check sample sizes...
+```
+
+Now let's build our shortcut code for the confidence interval. We need to identify:
+
+* What is our quantitative response, and what grouping variable does it depend on?
+
+* What data frame are we using?
+
+* What confidence level do we want?
+
+```{r}
+#place code here
+```
+(We can add the `tidy()` command to make this output easier to subset.)
+
+**Interpretation:**
+
+
+#### What does a confidence interval look like when there is a difference?
+Copy and paste the confidence interval code, but use a data frame where you have `dose==1`.
+```{r}
+#place code
+
+```
+
+**Interpretation:**
+
+
+## Returning to Fish
+Now let's practice on our own.
+
+0. Create a boxplot comparing all four species of tuna.
+
+*Show Work Below:*
+
+
+```{r}
+#place code here.
+```
+
+
+1. Pick two species of tuna, and compare a difference in their population mean weights *using a confidence interval.*
+
+* *Remember to check your assumptions before running the test!*
+
+*Show Work Below:*
+
+
+```{r}
+#place code here.
+```
+
+
+2. Pick two *new* species to compare, again explore using a confidence interval.
+
+*Show Work Below:*
+
+
+```{r}
+#place code here.
+```
+
+

@@ -1,0 +1,187 @@
+---
+title: "Confidence Intervals"
+subtitle: "All the bells and whistles"
+author: "P. Lombardo"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Loading packages, etc.
+```{r}
+library(tidyverse)
+library(patchwork)
+library(DescTools)
+library(broom)
+fish<-read.csv('data/fish.csv',header = T,
+               stringsAsFactors = T)
+MMs<-read.csv('data/MMs.csv',header=T,
+              stringsAsFactors = T)
+```
+
+## Reviewing Ideas
+The way we "build" our confidence intervals relies on the fact that we can predict where "most" of our sample statistics will fall (means or percentages, doesn't matter). This essentially happens because the sampling distribution usually has a normal shape and so the Empirical Rule applies. Specifically,
+
+> About 95\% of our sample statistics fall within 2 *standard errors* from the population parameter we are trying to estimate.
+
+Therefore, guessing an interval like $$(\text{statistic} - 2*\text{S.E.}, \text{statistic} + 2*\text{S.E.})$$
+should overlap the actual population parameter about 95\% of the time.
+
+The fact that 95\% of our potential samples should lead to a C.I. containing the population parameter gives us *confidence* that the single C.I. we computed came from one of those lucky ones that overlaps the parameter.
+
+The **2** in the `2*SE` formula is connected with the 95\% likelihood. Changing that multiplier changes the success rate for the confidence interval process.
+
+**Definitions.**
+
+* The multiplier we use on the *standard error* is called a ***critical value***.  
+* The likelihood a random sample will lead to a good confidence interval (one that overlaps the parameter) is called the ***confidence level*** of the interval.
+
+> Main idea: As a researcher, *we choose* our ***confidence level***. Then, based on the model we use for the sampling distribution (yes there are some alternatives...), we would compute the ***critical value*** and build the interval from there.
+
+## Trees
+The `trees` data frame contains a sample of tree heights for black cherry trees.  Using a confidence level of 92\%, and a $t$-distribution confidence interval, estimate the mean population height for black cherry trees.
+
+*Before we get computing*, do we satisfy our assumptions for this technique? What do we require for the CLT TO hold? 
+
+* Can we assume the population data has a normal shape? If not, is the sample size above 30?
+
+```{r}
+# summarize
+
+# Standard Error
+# Replace sigma with our sample standard deviation, s.
+
+# Critical Value?  Don't worry about why, but this would
+# be the correct computation of the critical value for a confidence
+# level of 92%
+critval<-qt(1-.08/2)
+
+# Interval
+
+```
+
+Of course, we rarely do all that work in practice, so:
+```{r}
+t.test(trees$Height,
+       conf.level=.92)
+```
+
+> ***Great News!*** From this point forward, we will focus on using `t.test()` for our analysis of means.
+
+## Examples for means
+**Example.** The `fish` data frame contains weights from a random sample of a few different species of tuna. Using a confidence level of 98\%, estimate the population mean weight for "albacore" tuna. 
+
+Do we satisfy our assumptions for this technique? 
+
+<answer here.>
+
+*Approach 1:* using `dplyr` pull
+```{r}
+# filter your data frame
+
+# pull the weights
+
+# pass into t.test and store results as CI1.
+
+# run CI1$conf.int
+```
+
+*Approach 2:* All in one pipe with `broom`'s `tidy()` function:
+```{r}
+library(broom)
+# Let's comment each line of code below
+# place filter code below
+fish %>%
+    filter(...) %>%
+    select(weights) %>%
+    t.test(conf.level = .98) %>%
+    tidy() %>%
+    select(conf.low, conf.high)
+```
+
+
+**Exercise.** Using a method of your choice, estimate the population mean weight for "bigeye" tuna with a confidence level of 96\%.
+```{r}
+# place your code here
+# Remember to check your assumptions!
+
+
+```
+
+Great! ***But,** what does that mean?*
+
+C.I. Interpretation: *place answer here.*
+
+### Confidence Interval Interpretation
+Assume your confidence level is set to 95\%. On some level, we always interpret a confidence interval in the same way: 
+
+> We are 95\% confident that the true population parameter falls between [conf.low] and [conf.high].
+
+Our "confidence" comes from the fact that our probability model for the sampling distribution predicts that 95\% of the samples from the population will fall a given distance from the population parameter. (That distance is the critical value times the standard error.)
+
+Let's carry this interpretation into our examples with percentages.
+
+## Examples with percentages
+To compute confidence intervals for a single percentage, we will use the `BinomCI()` function from the `DescTools` package.
+
+**Example:**  Assume that the `fish` data set came from a random sample of tuna caught off the coast of MA.  Using a confidence level of 97\%, estimate the population percentage of "yellowfin" tuna in this location.
+```{r}
+# First get a table of counts
+
+```
+
+Do we satisfy our CI assumptions for a Wald test?
+
+* Are there at least 10 in each of the two categories? (Our 10-yes-10-no guideline).
+
+Now use `BinomCI()` to compute the confidence interval:
+```{r}
+# place code here.
+```
+
+* *Test Conclusion:* ....
+
+**Example:** We are interested in the percentage of "blue" M\&Ms that a local factory produces.  We consider a Halloween bag of 20 M\&Ms as a random sample, so we opened one and recorded the colors in `MMs`.   Using a confidence level of 90\%, estimate the population percentage of blue M\&Ms.
+
+```{r}
+#explore here
+```
+
+Do we satisfy our CI assumptions?
+
+```{r}
+#place code here.
+```
+
+* *Test Conclusion:* ....
+
+
+## Conclusions
+In this lesson we learned about *critical values*, *confidence levels*, and we formalized how to interpret the results of a confidence interval.  We will soon see more examples of confidence intervals, and they have the same "bone structure" as these introductory kinds. What changes is the *parameter* value that they estimate!
+
+Hopefully, our M\&M example is nagging at you. What can we do if we cannot be confident that the CLT holds, and hence our usual approach for creating confidence intervals does not achiever the success rate we desire?  
+
+We'll explore that next!
+
+
+## Bonus code!
+
+A table of confidence intervals for each fish species:
+```{r}
+fish %>%
+    group_by(species) %>%
+    # we need reframe instead of summarize when 
+    # the function returns a vector of more 
+    # than one number!
+    reframe(CIs = t.test(weights,
+                   conf.level = .98)$conf.int
+            ) %>%
+    # add labels for conf.low and conf.high estimates
+    mutate(intervals = rep(c("conf.low","conf.high"),4)) %>%
+    # the pivot_wider command makes the table look
+    # nicer.
+    pivot_wider(names_from=intervals,
+                values_from=CIs)
+```
+
+

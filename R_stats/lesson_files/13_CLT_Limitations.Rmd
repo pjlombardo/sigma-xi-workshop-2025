@@ -1,0 +1,162 @@
+---
+title: "The limitations of the Central Limit Theorem"
+subtitle: "Hey, nobody's perfect!"
+author: "P. Lombardo"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Loading packages, etc.
+We need a new package: `DescTools`.
+
+```{r echo = F, message = F, warning = F}
+library(tidyverse)
+library(patchwork)
+library(DescTools)
+ITcosts<-read.csv('data/ITcosts.csv',header = T)
+tSim<-read.csv('data/t-simulation.csv',header = T, stringsAsFactors = T)
+tSim_not_normal<-read.csv('data/t-simulation-non-normal.csv', header = T, stringsAsFactors = T)
+source('source_files/CIs.R')
+source('source_files/general.R')
+```
+
+## When Confidence Intervals Fail
+**Simulations with Shiny:**
+
+* [CI Simulation for Percentages](https://stem.endicott.edu/pl-shiny/confidence-intervals/ci-mean-wald-sigma-unknown/)
+* [CI Simulation for means](https://stem.endicott.edu/pl-shiny/confidence-intervals/ci-perc-wald/)
+
+## The Central Limit Theorem
+I'll continue to spare you the technical statement of the Central Limit Theorem (please take a probability course!), but I want to bring your attention to a few limitations of the Central Limit Theorem approach.
+
+1. The Central Limit Theorem "works well" only when sample sizes are sufficiently large.  How large? It's case-dependent, but I have shared some guidelines:
+    * For sampling distributions of a percentage, we usually require $np>10$ and $n(1-p)>10$.  
+    * For sampling distributions of a mean, we usually require $n>30$.
+    * (We will discuss new sampling distributions by the end of the course!)
+
+2. The CLT formulas and statement require that we know population parameters (like $p$, or $\mu$ and $\sigma$) that we never actually know. So in practice, *we replace the parameter by the sample statistic.*
+
+
+Notice ***both*** of these limitations are related to sample size!  
+
+* For (1), if we do not have the appropriate sample size, the CLT theorem doesn't hold. This usually manifests as the sampling distribution *not having a normal shape*. Hence, using a normal distribution is inappropriate.
+
+* For (2), if our sample sizes are small, then the sample statistic we compute will not be a reliable replacement for the population parameter! (The Law of Large Numbers is one way to understand this.)
+
+In addition to avoiding these limitations, we also want to increase our sample sizes for other reasons. 
+
+* For example, we have observed that the standard error of a sampling distribution *decreases* as sample size increases; this leads to narrow confidence intervals when our sample sizes are large! (narrow = better, folks)
+* We will see other reasons soon!
+
+##### So, what can we do?
+Well, try to collect as much data as you can; *however*, we often have less control over this than we'd like.
+
+Luckily, mathematicians and statisticians have been working on this for a long time (and continue to work on it), so there are a host of common "tweaks" to our CLT approach that we often use instead.  
+
+## Working with means: the $t$-distribution tweak
+Replacing $\sigma$ with $s$ can be problematic when sample sizes are small. However, if we can assume our population measurements are relatively normal in shape, we can replace the normal distribution with something called the $t$-distribution and fix the issue!
+
+The `tSim` data frame contains some simulation results that we will view below. Basically, I started with a normal population, and sampled from it to estimate a success rate for confidence intervals using two methods: our normal approach, and the $t$-distribution tweak. (I used about 5000-samples per estimate).  I did this for sample sizes starting at 3 and going out to 50.
+```{r}
+ggplot(data = tSim,
+       aes(x = sample_size, y =success_rate, color=method))+
+    geom_hline(yintercept=0.95,color='gray',linewidth=2)+
+    geom_line()+
+    scale_y_continuous(
+        limits=c(.75,.97),
+        breaks=seq(0.75,.97,by=.05),
+        labels=scales::percent
+    )+
+    labs(x="Sample Size",
+         y="Success Rates",
+         title = "Comparing Confidence Interval Methods",
+         subtitle = "Normal Population")+
+    scale_color_brewer("Method",palette="Set1",
+                       labels=c("CLT Approach","t-dist. tweak"))+
+    theme_bw()
+```
+
+Is the $t$-distribution a good tweak? Why?
+
+
+If we cannot assume a reasonably normal population, however, we run into trouble. Below, plot a histogram of the `ITcosts` data:
+```{r}
+#place ggplot() code here.
+ggplot(data = ITcosts,
+       aes(x = dollars))+
+    geom_histogram()
+```
+
+Is this shape normal?
+
+* Note, there is some question as to *why* you'd want to estimate the mean here. With highly non-normal data, the mean doesn't always give us the information we're expecting.  (Use `geom_vline()` to show where the mean is above.)
+
+Below is a plot comparing success rates, as we did above, but this time we sample from the `ITcosts` data, a non-normal population.
+```{r}
+ggplot(data = tSim_not_normal,
+       aes(x = sample_size, y =success_rate, color=method))+
+    geom_hline(yintercept=0.95,color='gray',linewidth=2)+
+    geom_line()+
+    scale_y_continuous(
+        limits=c(.4,1),
+        breaks=seq(0.4,1,by=.05),
+        labels=scales::percent
+    )+
+    labs(x="Sample Size",
+         y="Success Rates",
+         title = "Comparing Confidence Interval Methods",
+         subtitle = "Non-normal Population: ITcosts")+
+    scale_color_brewer("Method",palette="Set1",
+                       labels=c("CLT Approach","t-dist. tweak"))+
+    theme_bw()
+```
+
+> Main Idea: Let's summarize....
+
+
+## Working with percentages
+When working with percentages, we verify a "large enough sample size" by checking we have at least 10 "yes" and 10 "no" observations. 
+
+Since we explore confidence intervals above, we'll point out that a similar defect occurs when we do not meet these assumptions: *our "success rate" does not reflect the 95\% goal we set.*
+
+### Alternative confidence intervals for percentages
+The CLT approach that I taught previously is called the "Wald method" in statistical circles, and its success rate is pretty low in cases where we do not meet the testing assumptions. Thankfully, there are two other approaches:
+
+* The Agresti-Coull method, and
+* The Wilson-score method.
+
+To see this, I sourced three helper functions that allow you to simulate the success rates under different sample size (`n`) and population percentage (`p`) assumptions:
+
+```{r}
+n<-50
+p<-.3
+# Assumptions:
+# place code here
+
+# compare success rates:
+wald_CI_success(n,p)
+agresti_coull_CI_success(n,p)
+wilson_CI_success(n,p)
+```
+
+In cases where sample sizes are small, or we do not meet the "at least 10 yes and 10 no" requirements, we can tweak and use one of these alternative methods.
+
+**Example.** Suppose we look at the 1-month survival rate for a random selection of 15 goldfish at a pet-store. We find that after the end of one month, 4 have died.  Estimate the population survival rate for these goldfish.
+
+* Do we meet the "Wald method" assumptions?
+
+```{r}
+#place code here.
+```
+
+**Exercise**: Revisit the M\&M example from lesson 12 and use one of our new "tweaks" to get a confidence interval.
+
+## Conclusions
+The CLT approach we explored in detail during previous weeks is, for most cases (i.e. $n$ large), exactly what's going on for confidence intervals.
+
+In those cases where we cannot satisfy assumptions of a test or confidence interval, we need to make some small alterations to the approach. We have seen some of these above, and I'll describe others as they arise. 
+
+*However,* even these "tweaked" approaches work in loosely the same way as our CLT approach.  So while the details (and probability distributions) may differ, the CLT approach is a great representation of ***how*** our confidence intervals (and soon hypothesis tests) work. 
+
+Armed with this understanding of the general mechanics, we can now re-focus our efforts into the finer details and practicing with actual inferential statistics based on data.

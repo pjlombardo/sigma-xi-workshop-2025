@@ -1,0 +1,170 @@
+---
+title: "Comparing Percentages Between Groups"
+subtitle: "Three is a crowd..."
+author: "P. Lombardo"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Loading packages, etc.
+```{r}
+library(tidyverse)
+library(patchwork)
+library(DescTools)
+library(broom)
+gss<-read.csv('data/gss.csv',header = T, stringsAsFactors = T)
+movies<-read.csv('data/movies.csv',header = T, stringsAsFactors = T)
+```
+
+
+In previous lessons, we explored how to compare population means between two different groups using either hypothesis testing or confidence intervals.  In this lesson, we'll focus on comparing population percentages between two populations.
+
+There are just a few main differences:
+
+1. Our testing assumptions are different, so we need to keep that in mind.
+2. We will use `prop.test()` for hypothesis testing. 
+    * *Note*: As with hypothesis tests of single percentages, we will first summarize our data in a `table()`, and then plug in values. (There is a more streamlined way, but this way provides more flexibility in the questions we can ask.)
+
+
+### A hypothesis test 
+**Let's test a saucy claim my father once made: from the year 2000 forward, having a college degree has an association with one's political party identification.** We will set a null hypothesis that whether you are democrat or other, the percentage of college degrees is the same.
+
+
+What does the General Social Survey data, `gss`, suggest? 
+```{r}
+#place code here.
+```
+
+0. Prepare the data
+
+Let's consider only the information from collected from participants in the year 2000 and later. And let's create a new variable called `is_dem` that records whether a person's political party identification is "democrat" or "other".
+```{r}
+#place code here to prepare the data frame.
+```
+
+1. Who is group 1? Let's run a levels command to see which comes first.
+
+```{r}
+#place code here.
+```
+
+*What difference are we making a claim about? (Make the order clear.)*
+
+
+*What are the Null and Alternative Hypotheses?*
+
+* $H_0:...$
+* $H_1:...$
+
+*What type of test is this? How should we set `alternative = ...`*
+
+
+
+2. Do we meet the requirements of this test?
+
+Assuming the null hypothesis will require $p_1 = p_2$, so we will check our usual *10-successes-and-10-failures* criteria on a "pooled" sample percentage. (*Note*: some texts just have you check the success-failure condition on each group; this is probably fine too.)
+
+* The pooled sample percentage of "degree" holders combines the data from both the "democrat" and "other" groups.
+```{r}
+#Let's look at a table of results
+```
+
+
+3. Let's write the shortcut code!
+
+Guidelines:
+
+* The `x` argument contains the counts for each group for the category of interest. To match the ordering for the `levels()` command, list the counts for the top row group first. For example, since "democrat" is our group 1, we would use `x = c(22, 63)`.
+* the `n` argument contains the sample sizes for our groups. Again, order is important here, and you should start with the sample size for the top row: `n = c(55,135)`
+* The only other argument we have to set is `alternative = ...`, which depends on our type of test: two-tailed test.
+```{r}
+#place code here.
+```
+
+4. Conclusion? What can I tell my Dad?
+
+
+**Important Notes:**
+
+* Note that we compare the percentage of degree holders. If we wanted to compare the percentage without a degree (the second column category of our table output), we would use `x = c(33,72)`.
+* We can also use the `x` and `n` arguments to change who is "group 1".  For example, if we wanted to use the "other" group as group 1, we would use `x = c(63,22)` and `n = c(135,55)`.
+* We can look at left and right-tailed tests too by adjusting the `alternative` argument For example, if my Dad was more brazen and claimed that democrats have an equal or lower percentage of college degrees when compared to others, we'd have
+    * $H_0: p_{\text{dem}} - p_{\text{other}} \leq 0$
+    * $H_1: p_{\text{dem}} - p_{\text{other}} >0$
+    * `alternative = "greater"`
+
+
+
+
+## Movies
+In the `movies` data frame, we have a random sample of movies over many years.  Take a minute to explore the variables and the data frame:
+
+```{r}
+#place code here
+```
+
+#### To laugh or not to laugh
+Let's test the following claim: 
+
+> From the year 2000 forward and among movies rated "R" and "PG-13", the percentage of comedies making over 100 million is greater than or equal to the percentage of other genre movies makeing over 100 million.
+
+
+0. Prepare the data
+
+Create a new data frame by doing the following:
+
+* Filter `movies` to include only movies from the year 2000 forward, and only those with a certificate rating of "R" or "PG-13".
+* Add a variable called **over_100** that records whether a movie grossed more that 100. (The **gross** variable is measured in millions, so this is really 100  million.)
+
+```{r}
+#place code here to prepare the data frame.
+```
+
+1. Who is group 1? Let's run a levels command to see which comes first by default.
+
+```{r}
+#place code here.
+```
+
+*What difference are we making a claim about? (Make the order clear.)*
+
+
+*What are the Null and Alternative Hypotheses?*
+
+* $H_0:...$
+* $H_1:...$
+
+*What type of test is this? How should we set `alternative = ...`*
+
+
+
+2. Do we meet the requirements of this test?
+
+Remember for the hypothesis test, we only need to satisfy the 10-yes-10-no criteria in the *pooled sample*.  Do we have at least 10 movies that grossed over 100 million and at least 10 that didn't?
+```{r}
+#Let's look at a table of results
+```
+
+
+3. Write the shortcut code.  Remember to be careful of the order in which you put the values in the `x` and `n` arguments. Do these counts/sample-sizes go in the same order as your hypotheses above?
+
+```{r}
+#place code here.
+```
+
+4. Conclusion:
+
+
+### Further practice
+
+Test the following similar claim:
+
+> From the year 2000 forward and among movies rated "R" and "PG-13", the percentage of dramas making more than 100 million is greater than or equal to the percentage of "other" genre movies that made more than 100 million.
+
+Show your work below, moving through the usual steps for hypothesis testing.
+
+```{r}
+# place code below.
+```
+

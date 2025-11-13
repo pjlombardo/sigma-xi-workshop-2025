@@ -1,0 +1,158 @@
+---
+title: "Intro to R and R Markdown Sheets"
+subtitle: "Loading data and basic analysis"
+author: "P. Lombardo"
+output:
+  html_document:
+    df_print: paged
+---
+
+# Introduction to R Markdown
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. This interface is a nice way to blend a word processor with the computational power of the R program. As you look at this document, you will notice a few things.  At the top of this document, you have the "header" material for the notebook.  This specifies a title for the report, an author (you), and an output type.
+
+Below the header, we have two ways to interact.  The first is normal text, as you have been reading so far.  The second is a code-block, as seen below:
+
+```{r}
+sqrt(10-3)/5
+
+1+2
+```
+
+If you click the small play button far right of the code-block, the R program will perform the specified computations.  
+
+An alternative way to execute an entire code-block is by placing your cursor inside it and pressing *Cmd+Shift+Enter* on a mac or *Ctrl+Shift+Enter* on a PC. Try this with the block below:
+```{r}
+x<-runif(50, 0, 15)
+hist(x,col='gray')
+```
+
+**Note**: Hitting *Cmd+Enter* or *Ctrl+Enter* will only run one line of code; particularly the line of your cursor.
+
+
+You can hide the output of the output of a code-block by clicking the double up arrows in the upper right.  Try that with the output above to hide our histogram.
+
+You can add a new code-block using the drop down with the plus sign and the "C" in green along the top of this window (toolbar); select the R.  I recommend you use the keyboard shortcut and press *Cmd+Option+I* on a mac or *Ctrl+Alt+I* on a PC.
+
+Try this below:
+
+```{r}
+10+2
+```
+
+
+# Our first R code
+In this quick exercise we will learn two ways to load data, and then demonstrate some quick ways to explore the data.
+
+## Loading data and data frames
+Assuming your file is in CSV format (as most are), you can read information into R in several ways.
+
+1. We can use the `read.csv()` command.  The general syntax will be `read.csv('file_path/file_name.csv', header=T)`:
+```{r}
+titanic <- read.csv('data/titanic.csv',    # location/name of file
+                    header=T,              # top row of file is headers
+                    stringsAsFactors = T)  # make strings into factor variables
+```
+
+The `titanic` variable references an R *data frame*; this is essentially the R version of an excel sheet. To see the contents, we can just type the name inside a code chunk and run it.
+```{r}
+titanic
+```
+
+2. A second option is to go to the "Environment Pane" in the upper right, and click the icon that looks like a spreadsheet with a green arrow coming out. Select "From text (base)" for CSV-files.
+
+* Use the "Name" box to choose how the data frame will be stored (i.e. it's nickname)
+* Make sure to check the box for "Strings as Factors"; that is how we will work with data this semester.
+
+3. From the "Files Pane" in the lower right, you can navigate to the **data** folder and click a file.  This will give you the option to import the data set.
+
+
+## Accessing data and statistical summaries
+We can access the data in particular columns by using the `$` operator:
+```{r}
+titanic$Age
+# code after a hashtag won't get evaluated
+# This is a vector of the ages for the people in the titanic data set.
+```
+
+#### Exercise 1:
+*Below, create a code chunk and access the `Survived` column of the `titanic` data frame.*  Notice that R Studio can help you auto-complete; pause after typing the dollar sign.
+
+****
+#### Answer:
+
+...
+
+****
+
+Built-in to the software, R has many different commands that allow the researcher to quickly generate summaries and visualizations for the data in a data frame.  Luckily for us, the code gives some heavy hints as to what it's doing, once you get used to it.
+
+#### Exercise 2:
+
+*What do you think the following command will do? (Answer below the code chunk.)*
+```{r}
+mean(titanic$Age)
+```
+
+****
+#### Answer:
+<place your answer here>
+
+****
+
+
+## Visuals, quick versus pretty
+
+R can also quickly generate visualizations using commands like `hist()`, `boxplot()`, and `plot()`.  We will introduce these quick plots, but we will do most of our plotting using the `ggplot2` package. 
+
+*Note*: While using `ggplot` takes a little longer, it has advantages:
+
+* you can create way more plots and "tune" them in a variety of ways,
+* creating plots has a uniform approach and logic, and 
+* the output, frankly, just looks better.
+
+### Quick visuals
+
+#### Exercise 4:
+*For each code chunk below, run the code and look at the output. Try to explain how the code works in your own words, as well as what the code generates.*
+
+```{r}
+hist(titanic$Age, col='red')
+```
+
+****
+#### Answer:
+<place your answer here>
+
+****
+
+```{r}
+boxplot(Age ~ Survived, data = titanic, col='gray')
+```
+
+****
+#### Answer:
+<place your answer here>
+
+****
+
+
+```{r}
+plot(Fare ~ Age, data = titanic, col='blue',
+     main="Fare vs. Age")
+```
+
+****
+#### Answer:
+<place your answer here>
+
+****
+
+We will explore the "pretty" visuals of `ggplot` in coming lessons, but we'll need to install the `tidyverse` package first.
+
+## Conclusion:
+
+We've learned some very some useful commands for data analysis today. We don't want to forget them!  Let's hit the `Preview` button to create an HTML file where we can review these commands and their output.
+
+Notice that next to each code chunk is a `hide`-button.  You can use this button to hide the code and test yourself on what we learned today!  
+

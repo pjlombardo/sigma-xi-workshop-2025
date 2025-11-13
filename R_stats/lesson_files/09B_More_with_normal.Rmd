@@ -1,0 +1,105 @@
+---
+title: "The More With The Normal Distribution"
+author: "P. Lombardo"
+output:
+  html_document: default
+---
+
+## Loading packages and data
+```{r}
+library(tidyverse)
+library(patchwork)
+set.seed(234)
+people<-data.frame(heights = round(rnorm(1000,65,4),1))
+set.seed(234)
+bank<-data.frame(savings = round(rnorm(1000,2100,150),2))
+source('source_files/general.R')
+source('source_files/normal_1.R')
+```
+
+## The Normal Distribution
+Recall that this is a *continuous probability model*, so here's the scoop:
+
+> Basic idea: 
+>
+> * the space is a continuous interval ($x$-axis), and
+> * Area Under Curve == Probabilities.
+
+
+## Visualizing Probabilities With the Normal Distribution
+Other examples using the helper function `norm_vis()`
+```{r}
+p1<-norm_vis(4,mu =1.5, sigma = 3, tail="lower")
+p2<-norm_vis(0,6,mu =1.5, sigma = 3, tail="middle")
+p3<-norm_vis(5.5,mu =1.5, sigma = 3, tail="upper")
+#patchwork combining plots
+(p1+p3)/p2
+```
+
+****
+    
+## The `pnorm()` probability guide
+For statistics, we typically care about computing three "types" of probabilities.
+
+1. $P(X\leq a)$ (a lower tail):  Here, `pnorm()` is already set up to work for us. We simply use `pnorm(a, mu, sigma)`, where `mu` and `sigma` are the parameters we chose for our model.
+
+2. $P(X\geq a)$ (an upper tail): Since `pnorm()` only computes "less than" probabilities; we have to use use an equality I call the "one minus trick": $$P(X\geq a) = 1 - P(X\leq a).$$ Hence, for "greater than" probabilities, we use `1 - pnorm(a, mu, sigma)`.
+
+3. $P(a \leq X \leq b)$ (a "middle area"): A similar argument as above leads us to the "big minus little trick: $$P(a\leq X \leq b) = P(X\leq b) - P(X\leq a).$$ Hence, for "middle area" probabilities, we use `pnorm(b,mu,sigma) - pnorm(a,mu,sigma)`.
+
+### Practice
+Use the `people` data frame, which records the **heights** of a random selection of 1000 fictional people. Assume a normal probability model with parameters $\mu = 65$ and $\sigma = 4$.
+
+**Exercise 1.** Find the rel. frequency of people who are shorter than 62 inches.  Then, compute the analogous probability using our assumed normal r.v. model.
+```{r}
+# rel. frequency
+
+# probability using the normal rv model
+
+```
+
+
+**Exercise 2.** Find the rel. frequency of people taller than 70 inches.  Then, compute the analogous probability using our assumed normal r.v. model.
+```{r}
+# rel. frequency
+
+# probability using the normal rv model
+
+```
+
+**Exercise 3.** Find the rel. frequency of people between 60 and 70 inches.  Then, compute the analogous probability using our assumed normal r.v. model.
+```{r}
+# rel. frequency
+
+# probability using the normal rv model
+
+```
+
+**Exercise 4.** Find the rel. frequency of people either taller than 70 inches, or shorter than 60 inches.  Then, compute the analogous probability using our assumed normal r.v. model.
+```{r}
+# rel. frequency
+
+# probability using the normal rv model
+
+```
+
+### Percentiles for random variables
+Let's do one more comparison.  We know that we can use `quantile()` to find a percentile for a data set, like `people$heights`.  We can also define percentiles for random variables like the normal distribution.
+
+> The $k$-th percentile of the normal distribution, $P_k$, is simply the measurement in the space of our random variable $X$ such that $P(X \leq P_k) = k/100$.
+
+For example,
+```{r}
+pnorm(63.02, 65,4)
+```
+So, we would call 63.02 the 31st percentile of our normal random variable model.
+
+In `R`, we can compute a percentile for a normal distribution quite easily with `qnorm()`:
+```{r}
+qnorm(.31, 65,4)
+```
+
+**Exercise 4.** Compare the 80-percentile of the people heights to the 80-th percentile of our normal r.v. model (i.e. normal r.v. using $\mu = 65$ and $\sigma = 4$):
+```{r}
+#place code here.
+```

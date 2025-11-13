@@ -1,0 +1,289 @@
+---
+title: "Analysis of Variance"
+subtitle: "What do you mean variation helps us compare means?"
+author: "P. Lombardo"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Loading packages, etc.
+```{r}
+library(tidyverse)
+library(patchwork)
+library(DescTools)
+library(broom)
+source("source_files/HT_errors_ANOVA.R")
+
+fish<-read.csv('data/fish.csv', header = T,
+               stringsAsFactors = T)
+
+
+get_name<-function(i){
+    nm<-c("May","Jun","Jul","Aug","Sep")
+    nm[i-4]
+}
+airquality<-airquality %>% mutate(
+    MonthName = sapply(airquality$Month,get_name)
+)
+
+```
+
+## Comparing Means of Many Populations
+
+### Warm up
+
+Let's consider our "Type I Error" situation from the previous lesson: 
+
+* We create 10 different samples of size 30 from a standard normal distribution. In other words, ***all 10 samples were drawn from populations with an equal mean!*** (That population mean is zero.) 
+
+* Let's test the null hypothesis $$H_0: \mu_1 = \mu_2 = ... =\mu_{10}$$
+Using an ANOVA, rather than pairwise testing. 
+    * The Type I Error rate here for an ANOVA should be the same as our significance level, since it protects against Type I Error inflation.
+```{r}
+# Can you understand what the code below does?
+# set.seed(744) # no type I errors
+set.seed(732) # one type I errors
+samples_df<-data.frame(
+    measurements=rnorm(10*30),
+    sample_num=rep(paste("Samp",1:10,sep=""),30)
+)
+```
+
+**Exercise.** Create a summary table that compares the means, medians, standard deviations, and IQRs for each of the ten samples.
+```{r}
+# place code here
+```
+
+**Exercise.** Create a comparative boxplot for these ten samples.
+```{r}
+#place code here.
+```
+
+
+***
+
+**Bonus Demonstration.**  That's right folks, we can create plots from summarized data. First, describe what the code below does!
+```{r}
+samples_df %>%
+    group_by(sample_num) %>%
+    summarise(mean = mean(measurements),
+              std.error = sd(measurements)/sqrt(30)) %>%
+    mutate(low = mean -2*std.error,
+           high = mean+2*std.error)  %>%
+# Now let's create a plot that adds geom_errorbar() to 
+# help us visualize the confidence intervals we generated above.
+    ggplot(data = .,
+           aes(x = sample_num, y = mean))+
+    geom_point()+
+    geom_errorbar(aes(ymin = low, ymax = high),color='blue')+
+    geom_hline(yintercept = 0, color='red')+
+    theme_bw()
+```
+
+***
+
+OK, so how do we run an ANOVA? We start by "fitting" that ANOVA with the `aov()` function, and that we summarize it with `summary()`. (Don't worry about the language, just get used to it.)
+
+```{r}
+# "Fit" the anova using `aov()`
+fit1<-aov(measurements~sample_num, 
+          data = samples_df)
+summary(fit1)
+# or 
+tidy(fit1)
+```
+While the theory is ***really interesting***, we unfortunately don't have time to discuss it this semester.  Alas, you'll have to make your peace with, temporarily at least, ignoring most of this output and looking straight to the $P$-value for the ANOVA.
+
+**Exercise.** What can we conclude given the $P$-value of this particular exercise? *Be very specific!*
+
+<answer here.>
+
+
+**Exercise.** Can we get to the $P$-value in one big dplyr pipe? Sure!
+```{r}
+# place code here
+```
+
+
+## ANOVA Applied Example 1: Tuna weights in Kg.
+Let's explore our first ANOVA example using the `fish` data set.  Explore this data frame and answer the questions below:
+
+  1. *How many "levels" (or categories) does the categorical variable have?  What are the levels?*
+  2. *Make a boxplot comparing weights of the tuna by species.*
+  3. *Run an ANOVA to test for a difference in the mean weights of the different species of Tuna.*
+
+What are the levels of `species`?
+```{r}
+#place code here
+```
+
+Let's look at a boxplot of `weights` by `species`:
+```{r}
+#place code here.
+```
+
+**Assumptions for an ANOVA**
+
+For a typical ANOVA, we want to make sure we have the following assumptions met:
+
+1. Samples sizes above 30 *in each group*, ***or*** we can assume normal population level measurements.
+2. About equal standard deviations (three-fold rule).
+
+(*Note:* these are the same as our difference in means confidence interval and hypothesis test. You can think of these as the assumptions that govern all "comparing means" tests.)
+
+*Do we satisfy our assumptions above?*
+```{r}
+#place code here
+```
+
+Lastly, let's run the ANOVA (We will discuss assumptions in the next section.)
+```{r}
+#place code here
+# Fit the model
+
+#summarize the model
+```
+
+
+Follow up questions:
+
+  2. *What is the P-value of this ANOVA?*
+<answer here>
+
+
+  3. *What can we conclude from the results?*
+
+<answer here>
+  
+
+#### Example: `airquality`
+The `airquality` data frame consists of air quality measurements from areas near New York City from May 1973 to September 1973.  
+
+As researchers, we believe that the `Ozone` measurements are influenced by the Month of the year; specifically, we suspect that the mean Ozone levels will be different depending on the Month. ***Our Null hypothesis, then, will be that the mean ozone levels are equal across the months of May through September.***
+
+1. What kind of statistical test is best for testing this null hypothesis, and why?
+
+<answer here>
+
+2. Create a boxplot of the `Ozone` measurements broken up by `MonthName`. 
+```{r}
+#place code here
+```
+
+3.  What are the sample mean `Ozone` levels broken up by `MonthName`?  What about the sample standard deviations in each for each month?
+```{r}
+#place code here.
+```
+
+4. 
+
+5. Fit an ANOVA and summarize it to get the $P$-value for this hypothesis test.
+```{r}
+#Place code here
+```
+
+6. What is our conclusion?
+
+<Write a small paragraph stating your conclusion.>
+
+***
+
+
+## Post-hoc testing with Tukey's HSD:
+Using an ANOVA, we can determine whether there is evidence that ***at least one** group mean* is significantly different than the others.  However, it does not tell us ***which*** mean (or means) are different!  For that, we need "post-hoc" testing.
+
+### How does it work? (Optional)
+
+**Basic idea:** go back to pair-wise testing!
+
+The only way to tease out differences is to look at comparisons of each group mean pair-wise. But as we mentioned Wednesday, this leads to higher type I error rates! What can we do?
+
+If using a 5\% significance level for the pair-wise comparisons leads to a large overall type I error rate, why don't we use a smaller significance level on the pair-wise comparisons to *lower* the overall type I error rate?
+
+Suppose you have $m$ different pair-wise comparisons to make. The *Bonferroni correction* essentially says to use $\alpha/m$ as your ***pair-wise significance level***, and this will keep the type I error rate for the *group test* around $\alpha$.
+
+* For example, suppose I'm looking for differences in means for 10 different populations, and I want to keep my Type I Error rate at 5\%. 
+    * Comparing 10 populations pair-wise would involved 45 two-sample tests. 
+    * **The Bonferroni correction would tell me to do pair-wise comparisons, but use $0.05/45 \approx 0.001111$ as my significance value for each test.**
+
+Let's consider our simulation from Wednesday's class where we simulated testing equal means for 10 populations; this required 45 pair-wise comparisons. (Remember we set up the code so that $H0: \mu_1 = ... =\mu_{10}$ is true, so this will estimate the type I error.)
+
+* Run the code once to re-affirm that pair-wise testing leads to inflated type I error risk.
+* Now update the code below (in line 178) so that we use a significance level of $0.05/45$ *on the pair-wise tests* (or `block45` $P$-values).  What happens?
+```{r}
+reject_Big_H0<-logical(200)
+for (i in 1:200){
+    # This code runs a block of 45 tests and
+    # collects P-values
+    block45<-sapply(1:45,two_sample_get_p)
+    
+    # Store TRUE/FALSE based on *at least one* pval under 0.05
+    # We will adjust the code below for Bonferroni's correction
+    
+    ###########################
+    ## UPDATE REQUIRED!!!######
+    ###########################
+    
+    reject_Big_H0[i]<- sum(block45<0.05) >= 1  # <---- UPDATE THIS LINE, change 0.05 to   0.05/45 to make a "bonferroni" correction.
+    
+}
+
+sum(reject_Big_H0)/200
+```
+
+### Tukey's HSD
+A common post-hoc test is the Tukey's Honest Significant Difference Test.  (This has many names, including Tukey-Kramer test, Tukey's Range test, etc.) In `R`, we can run this test by passing the fitted analysis of variance model into the `TukeyHSD()` command.  
+
+Let's try it on our `fish` ANOVA from above:
+```{r}
+# Place code here.
+```
+
+***
+
+***For each pair of groups, we compute an "adjusted $P$-value" that we can compare against our original significance level to see if there is evidence for a difference between these pairs.***
+
+
+***Note:*** The default $P$-value adjustment we see in this table is not quite the same as the *Bonferroni Correction*, but it's similar in idea.
+
+***
+
+
+By `tidy()`-ing the output of `TukeyHSD()`, we can `filter()` and `select()` the information we want to see. Specifically, let's filter so that we only include comparisons where the adjusted $P$-value is less than 0.05 (indicating evidence for a difference in means).
+```{r}
+#place code here.
+
+```
+
+
+Let's look again at our boxplot to visualize these results.
+```{r}
+# Place code here.
+```
+
+The table can be hard to visualize, so luckily we can pass the `TukeyHSD(aov.model)` into the `plot()` command and get a nice visual for "adjusted confidence intervals" for the difference in means.  If the confidence interval below avoids zero, we have evidence for a difference in means for that pair:
+```{r}
+# Place code here.
+```
+
+Unfortunately, not all the labels of the pair-wise comparisons show up nicely.
+
+Time-permitting, here is a ggplot() reproduction:
+```{r}
+#place code here.
+```
+
+
+## Recommended Process for Comparing Multiple Means
+
+**Note**: Many statisticians suggest when testing for equality among multiple means you do the following:
+
+1. Use ANOVA to see whether there is evidence that at least one mean is different.  
+    a. *If there is evidence that at least one mean is different*, then run Tukey's HSD to tease out where the differences lie.
+    b. *If we do not have evidence that at least one mean is different*, that concludes the analysis.
+    
+I recommend using this work flow as well, since it will have higher statistical *power* in certain cases. (More on power on soon!)
+
+
+

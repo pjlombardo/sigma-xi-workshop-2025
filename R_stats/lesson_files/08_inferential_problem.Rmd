@@ -1,0 +1,167 @@
+---
+title: "The Fundamental Problem of Inferential Statistics"
+author: "P. Lombardo"
+output:
+  html_document: default
+---
+
+## Loading packages and data
+```{r}
+library(tidyverse)
+population<-read.csv('data/pop_sim.csv',header = T)
+```
+
+
+# A Fundamental Problem
+
+> In statistics, we almost never work with an entire population of data. Instead, we make **inferences** based on a randomly selected sample from the population. But there is a fundamental flaw with this approach: ***Each random sample one could take from a population will give different information!***
+
+We can demonstrate this by actually sampling from a population! We loaded a data frame called `population` which contains information from a fictional population of 100,000 people. We recorded each person's **IQ** and whether or not they were born with at least one wisdom tooth **wisdom_teeth** (coded as *Yes* or *No*).
+
+We can use the `sample()` function from `R` to take a random sample of measurements from this population. Let's each take our own random sample, and we'll compare what happens:
+
+```{r}
+# replace the number inside set.seed(...) with your birthday. For example May 12th
+# is written as 512
+set.seed(512)
+
+# Now let's take a random sample from the IQ measurements using the sample() function.
+# Save your sample as S1
+
+# What is the mean IQ for your sample?
+
+```
+
+*Share your mean with the class!*
+
+Now let's use `sample()` to grab a random sample from the **wisdom_teeth** measurements.  We'll summarize it to give the percentage ***without*** wisdom teeth (i.e. the "No" response):
+```{r}
+# Take a random sample and save it as S2
+
+# Now find the percentage that said "No" in S2
+
+```
+
+*Share your percentage with the class!*
+
+
+> We use the term ***Sampling Variation*** (or sampling error) to refer to this natural variation in a statistic that arises from the random sampling process.
+
+
+## Working with Sampling Variation
+So if our guesses (the statistic we get from a random sample) are always wrong and subject to *sampling variation*, ***what can we do?***  How do we make "smart" inferences on such a flawed piece of information?  Let's learn from the best fictional inferentialist there is!
+
+> "**While the individual man is an insoluble puzzle, in the aggregate he becomes a mathematical certainty.**"  -- Sherlock Holmes (Sir Arthur Conan Doyle, *The Sign of Four*).
+
+In a similar way, individual statistics (or guesses based on a sample) are wild because of sampling variation. ***However,*** IN THE AGGREGATE they have quite predictable and useful behavior.
+
+To explore this "aggregate behavior" of a statistic, we use a tool called a sampling distribution.
+
+> A **sampling distribution for a statistic** can be considered a very large data set of statistics generated from a large collection of random samples from a population.
+
+Here's a recipe for creating a sampling distribution, which assumes we have access to an entire population of data. (We do not usually, but we'll see how to circumvent this soon.) 
+
+1. Take a random sample from the population.
+2. Summarize the information in that sample, and store it in a new data set.
+3. Repeat this process about 10,000 - 100,000 times.
+
+The data set of summaries we just generated is a *sampling distribution*.
+
+Let's make one together, and explore the aggregate behavior.
+
+### Sampling Distribution for the Mean IQ
+We will use a simple for loop to collect 10,000 sample mean IQ guesses from our fictional `population`.  Let's use a sample size of 30.
+```{r}
+# First we create a storage vector for our means:
+sample_means<-numeric(10000)
+# here is the general format for an R for-loop
+for (i in 1:10000){
+    # Place directions here.
+    
+}
+```
+
+Now create a summary table for the sampling distribution we created; remember we stored our sampling distribution data in `sample_means`.  Compute the mean, median, and standard deviation.
+```{r}
+# place code here
+# I start by creating a data frame so we can use tidyverse to do our
+# summarizing.  Add to the code below
+data.frame(x = sample_means)
+
+
+```
+
+1. *How does the mean compare against the actual population mean IQ?*
+
+
+2. *Re-run the loop above, but change the sample size to 100. What happens to the standard deviation of the sampling distribution for mean IQ?*
+
+
+
+Next create a histogram for our sampling distribution.
+```{r}
+# place code here
+# As above, we will need to create a quick data.frame() to work with ggplot
+# Add to the code below
+
+ggplot(data = data.frame(x = sample_means))
+
+```
+
+3. *What's the "Shape" of this sampling distribution?*
+
+
+
+
+### Sampling Distribution for the percentage without wisdom teeth 
+We will use a simple for loop to collect 10,000 sample *percentage* guesses from our fictional `population`.  Let's use a sample size of 30.
+```{r}
+# First we create a storage vector for our means:
+sample_percents<-numeric(10000)
+# here is the general format for an R for-loop
+for (i in 1:10000){
+    # Place directions here.
+
+    
+}
+```
+
+Now create a summary table for the sampling distribution we created; remember we stored our sampling distribution data in `sample_percents`.  Compute the mean, median, and standard deviation.
+```{r}
+# place code here
+# As before, create a data.frame() first so we can use the dplyr pipes to summarise
+
+```
+
+1. *How does the mean compare against the actual population that said "No"?*
+
+
+2. *Re-run the loop above, but change the sample size to 100. What happens to the standard deviation of the sampling distribution for Sample Percentage of "No"*
+
+
+
+Next create a histogram for our sampling distribution.
+```{r}
+# place code here
+# Remember to create a data.frame() first so we can use ggplot
+
+
+```
+
+3. *What's the "Shape" of this sampling distribution?*
+
+
+## Summarizing Sampling distributions
+So what "aggregate behavior" can we expect from our statistics?  Under certain assumptions, it turns out sampling distributions all share three important properties that provide the basis of our inferential statistics techniques:
+
+1. 
+
+2. 
+
+3. 
+
+***
+
+*Technical Note:* These properties we observe only work for certain statistics (specifically means and percentages), and only when our sample size is "large."  In fact, this behavior is the result of an important mathematical/statistical theorem called ***The Central Limit Theorem***, which we will explore next.
+
+***

@@ -1,0 +1,139 @@
+---
+title: "Introduction to Quantitative Variables"
+author: "P. Lombardo"
+output:
+  html_document: default
+---
+
+## Load packages and data sets
+```{r}
+library(tidyverse)
+two_stores<-read.csv("data/two_stores.csv", header = T, 
+                     stringsAsFactors = T)
+source('source_files/general.R')
+```
+
+
+# Quantitative Variables
+
+## Quantitative Summaries
+Measures of center: `mean()`,  `median()`, and `mode()`.
+
+Quick summaries
+```{r}
+#place code here
+```
+
+Making Summary Tables with `summarize()`
+```{r}
+two_stores %>%
+    summarise(
+    # list our summaries here: mean, median, sample size
+    
+    )
+```
+
+The summary table above combines both stores together into one large data set.  What if we want the same summaries, but separately for each store location? 
+
+```{r}
+# copy the summary table code above, and let's add to it.
+```
+
+**Exercise.** Look at the summary table above comparing the two stores. What can we say so far about the two stores? Do the sales in Beverly seem different than the sales in Boston?
+
+*For those interested*: we can switch the rows and columns of these summary tables if we want, but it involves some trickery.  I wrote a small `flip_tibble()` function to accomplish this and it was "sourced" in the first code chunk with the `general.R` file.  Try it below!
+```{r}
+# copy and past the table, then add %>% flip_tibble() to the end
+
+```
+
+
+### Visualizing with Histograms
+A simple histogram only has one aesthetic (`x`), and we use `geom_histogram()` as our geometry to produce the plot. Let's explore below by looking at a histogram of salmon weights.
+```{r}
+#Place code here to explore a basic histogram
+ggplot(data = ...,
+       aes(...))+
+    geom_histogram()
+
+# A little ugly at first, let's make some modifications...
+    # bins = ... or 
+    # breaks = seq(start, stop, by = step)
+    # color = "white"
+```
+
+
+### Measures or Variation
+While *measures of center* try to summarize where the "center" of the data values falls, *measures of variation* attempt to describe the degree to which the data values are spread out. Let's revisit our stores from the lens of *variation* in sales.
+
+Here are the usual measures of variation: 
+
+* standard deviation `sd()` (and its counterpart variance `var()`)
+* inter-quartile range `IQR()` (*We will talk about IQR in the future lesson.*), and 
+* range, defined as the maximum value minus the minimum. <br> There is no simple function for this, but also the least useful, in my opinion.  
+
+**Exercise.** Copy and paste the summary table from above, but this time let's add in the range and std. deviation in our summary.
+```{r}
+# place the copy here and modify it.
+```
+
+So, ***what differentiates these two data sets?***
+
+<answer>
+
+Let's visualize this. Ideally, we want to compare histograms for each store (rather than all together like we did above).  We can do this in ggplot using a `facet_wrap(vars(...), nrow = ...)` layer.
+```{r}
+ggplot(data = two_stores,
+       aes(x = sales))+
+    geom_histogram(bins = 10, color="white")
+    # add to the plot to separate the histograms
+
+# adding facet_grid(store~.) will also work, we may explore this another time.
+```
+**Challenge:** Can you make each store's histogram a different color?  Here's a hint... the fill of the histogram would depend on the data (specifically the `store` variable).
+
+
+## The Empirical Rule
+There is something very special about data that has a "normal shape."  This shape has the following characteristics:
+
+* Most of the data tends to fall pretty close to the mean, with fewer measurements occurring in regions that are farther way from the mean.
+* The data is symmetric about the mean; the shape to the left of the mean is a mirror image of the shape to the right of the mean. Moreover, the data falls with equal likelihood on either side of the mean.
+
+Most importantly however, is that for normal shaped data the **Empirical Rule** applies!
+
+> **Empirical Rule**:  For a normal distribution, roughly 95\% of the data falls within two standard deviations of the mean.
+
+> * The interval of values that are two standard deviations from the mean will be referred to as the *empirical region*.
+
+1. *What is the empirical region for Store 1?*
+
+```{r}
+# Place code here
+
+```
+
+We can verify this 
+
+2. *What is the empirical region for Store 1?*
+
+```{r}
+# Place code here
+
+```
+
+
+How much of the data falls in the empirical region for each store? I made a little function that computes the percentage of data in the empirical region automatically (`empirical_pct()`); we use it below:
+```{r}
+two_stores %>%
+    group_by(store) %>%
+    summarize(empirical_percent = empirical_pct(sales))
+```
+
+
+What if the shape is not normal? It depends, but the 95\% estimate is no longer accurate or consistent.  Here is a small [visualization.](https://stem.endicott.edu/pl-shiny/descriptive-stats/chebyshevs/)
+
+**Note:** The Empirical Rule is *very important* for an application in inferential statistics, so please learn and understand it well.   Here's another way to think about it that will be particularly helpful in our future application:
+
+> **Empirical Rule (Version 2):** Suppose a data set has a normal shape.  Then if we select a single measurement from the data, there is a 95\% chance that it will be less than two standard deviations from the mean.
+
+This way of expressing the Empirical Rule starts to blend probability with proximity to the sample mean, and it is the foundation for the confidence interval technique!

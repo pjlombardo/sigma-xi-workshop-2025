@@ -1,0 +1,170 @@
+---
+title: "Correlation"
+subtitle: "... does not mean causation"
+author: "P. Lombardo"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Loading packages, etc.
+```{r}
+library(tidyverse)
+library(patchwork)
+library(readxl)
+# library(DescTools)
+library(broom)
+library(palmerpenguins)
+
+skincancer<-read.csv('data/StateSkinCancer.csv',header = T,
+                     stringsAsFactors = T)
+
+```
+
+
+## Pearson's Correlation Coefficient: measuring a relationship between quantitative variables
+
+### Skin Cancer by Latitude and Longitude:
+We have loaded the `skincancer` data set, which tracks skin cancer mortality per capita for each of the 50 contiguous US states.  We also record the latitude (**Lat**) and longitude (**Long**), for each state, as well as whether it is next to an **Ocean** (Yes is recorded as 1).
+
+```{r}
+str(skincancer)
+```
+
+Create a scatter plot of this data comparing Latitude against the skin cancer rates:
+```{r}
+#Place code here
+```
+
+(Try "coloring" by the **Ocean** variable)
+
+
+**Exercise.** Copy and paste the code above, but this time compare Longitude against the skin cancer rates. 
+```{r}
+# Place code here
+```
+
+* *What is different about these two plots?*
+
+#### A statistic to measure the linear association between variables
+
+For two quantitative variables, we use the sample Pearson correlation coefficient to compare the strength *and* direction of a potential linear association.  In `R`, we use the `cor()` function. 
+
+* You can use `cor()` inside a `summarize()` dplyr pipe:
+
+```{r}
+# cor() function for Pearson's correlation coefficient.
+
+```
+
+* Alternatively, we can pass a data frame with many quantitative variables into the cor function and return *a matrix* of correlations. Try selecting just `latitude`, `longitude`, and `mortality` from our data frame, and pass that into `cor()`.
+```{r}
+
+```
+
+
+## Sample statistic $r$ vs. population parameter $\rho$
+Let's generate some population level data that ***is correlated***:
+```{r}
+# This creates a population where two variables (x and y) are 
+# strongly correlated.  Your correlation will be slightly different.
+set.seed(553311)
+test_x<-rnorm(5000, 60, 15)
+test_y<-1.3*test_x + rnorm(5000,0,15)
+paste("Population Correlation:", round(cor(test_x,test_y),3))
+```
+So what happens when we take a sample?
+
+```{r}
+ind<-sample(1:5000,35)
+ggplot()+
+    geom_point(aes(x = test_x, y= test_y),
+               color='gray',alpha = .5)+
+    geom_point(aes(x = test_x[ind], y= test_y[ind]),
+             color='blue')+theme_bw()+
+    annotate(geom="text", x = 20, y = 160, label=paste("rho = ", round(cor(test_x,test_y),3)),cex=5)+
+    annotate(geom="text", x = 20, y = 140, label=paste("r = ", round(cor(test_x[ind],test_y[ind]),3)),cex=5,color='blue')+
+    labs(x = "x-values",y="y-values",title="Comparing the population correlation to a sample correlation.")
+```
+Does $r$ appear to generally fall near $\rho$?  
+
+[Shiny Visualization](https://stem.endicott.edu/pl-shiny/regression/regression-variation/)
+
+#### Hypothesis test for $\rho$
+Let's consider our `skincancer` data once more.  We suspect that as we move higher in the northern hemisphere (i.e. Latitude increases), the skin cancer mortality will decrease. 
+
+*Test the claim* that the correlation between these variables is greater than or equal to zero.
+
+(Why are we testing a claim we don't believe is true? So we can reject it!)
+
+Hypotheses
+
+* $H_0: ...$
+* $H_1: ...$
+
+
+We can run a hypothesis test for a claim about the population Pearson correlation coefficient, $\rho$, using the R-command `cor.test()`. As with all hypothesis tests, it's a good idea to write out your hypothesis first.
+
+  * $H_0$: our population correlation coefficient is ....
+  * $H_1$: our population correlation coefficient is ....
+
+```{r}
+#Place code here.
+```
+With a $P$-value (0.003) below a significance of 5\%, we reject the null hypothesis. We have sufficient evidence to suggest that correlation is negative at the population level. 
+
+
+## A very important point...
+Even finding a statistically significant *correlation* does not mean that you have found a **causal** relationship between your variables. 
+
+* Ice cream sales and the number of shark attacks have a significant positive correlation, but it would be silly to believe that ice cream is **causing** more shark attacks.
+
+* [This webiste gives a nice, high-level summary of this idea.](https://dm.cs.tu-dortmund.de/mlbits/foundations-correlation-causation/)
+
+#### Penguins again?!  OK, fine... we love penguins.
+Researchers suspect that penguins with longer flippers also tend to have longer bills.  How should we set our hypotheses?
+
+  * $H_0$: ...
+  * $H_1$: ...
+  
+Create a visual!
+```{r}
+# Place code here.
+
+```
+
+Run the hypothesis test:
+```{r}
+# Place code here.
+
+```
+
+
+Yeah, but ***what is*** our best guess for the correlation coefficient at the population level?
+
+```{r}
+# Place code here.
+
+```
+
+
+#### Explore on your own!
+Let's explore some research questions involving measurements of penguins.
+
+Make sure to 
+
+* Compute some summary tables
+* Make visualizations
+* Run confidence intervals or hypothesis tests!
+
+**Explore below!**
+```{r}
+#place code here.
+# Show them complete.cases()?
+
+```
+
+
+
+
+

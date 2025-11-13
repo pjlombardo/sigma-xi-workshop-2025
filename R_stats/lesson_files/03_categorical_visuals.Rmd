@@ -1,0 +1,121 @@
+---
+title: "Visualizing Categorical Data"
+author: "P.Lombardo"
+output:
+  html_document:
+    df_print: paged
+---
+
+Before beginning, let's get used to loading the `R` packages we might need for analysis later.
+```{r}
+library(tidyverse)
+titanic <-read.csv("data/titanic.csv",
+                   header = T,
+                   stringsAsFactors = T)
+```
+
+## Visualizing frequencies and percentages
+When working with categorical data, there are many visualizations. However, the most basic visual is a bar plot (and some of its varieties), which you have read about already.  I also happen to believe that the most basic plot is also the best! We have:
+
+* Simple bar plot
+* Side-by-side bar plots
+* Stacked bar plots
+* 100\%-stacked bar plots
+
+Now let's learn how to make bar plots using the visualization package `ggplot`.
+
+## Pretty visuals with `ggplot2`
+The plotting package `ggplot2` (part of the `tidyverse`) uses a layering approach to building a plot. Let's build a standard bar plot together, and we'll talk about each layer.
+
+```{r}
+# place code here
+
+```
+
+### Visuals with two variables
+When visualizing two variables, we have three options: a side-by-side barplot, a stacked barplot, and a 100%-stacked bar plot.
+
+* For each of these plots, there is a "main grouping variable" and its levels appear as the labels for the $x$-axis.
+* The second variable affects how we *fill in* the bars we just created with color. In ggplot, we use the "fill" aesthetic to control this.
+
+#### Side-by-side barplot
+The main idea is to set the main grouping variable as the `x` aesthetic, and the secondary variable as the `fill` aesthetic.  To get the side-by-side-ness, we pass `position = "dodge"` inside the `geom_bar()` layer.
+
+Since we are interested in how `Gender` associates with `Survived`, we want male and female to be considered separately on our horizontal axis. Hence, `Gender` is our main grouping variable, and `Survived` is the secondary variable.
+
+**Exercise.** Fill in the dots below with the correct variable names and run the code.
+
+```{r}
+ggplot(data = titanic,
+       aes(x = ..., fill = ...))+
+    geom_bar(position = "dodge")
+```
+
+#### Stacked barplot
+This is identical to the plot above, but drop the `position="dodge"` command from `geom_bar()`.  
+
+**Exercise.** Copy and paste your code above, and remove the appropriate argument from `geom_bar()`. Run your code and see if it works!
+```{r}
+# Place your copy here and modify it.
+```
+
+
+#### 100%-stacked barplot
+Again, this is a small modification on the previous plots.  Place the argument `position="fill"` into the `geom_bar()` layer.
+
+**Exercise.** Copy and paste your code above, and make the necessary modification.
+
+```{r}
+# Place your copy here and modify it.
+```
+
+### Important reflection!
+Each of the plots we created above highlight a different component of the association between `Gender` and `Survived` for the titanic disaster.  With a partner, write a few sentences on the strengths and weaknesses of each kind of barplot (side-by-side, stacked, and 100%-stacked)
+
+<Place your paragraph here.>
+
+***
+
+
+## (Optional) Modifying ggplots
+### Can we change the way a ggplot looks?
+Yes! You can do pretty much anything.  Below is a bit of sample code that makes some common tweaks to the plot. I've left comments to help you loosely understand it.
+
+*Note*: You do not have to understand all the code below. I provide this more to let you know some of the things ggplot can adjust.
+```{r}
+ggplot(data = titanic,
+       aes(x = Pclass,
+           fill = Survived))+
+    geom_bar(position = "fill")+
+    
+    # pick a new color scheme by "scaling" your "fill" aesthetic
+    scale_fill_brewer("Survived (Yes/No)", # changes the legend title
+                      palette="Set1" # brewer palettes are premade
+                      ) +
+    
+    # Adjust labels and create titles, subtitles, captions
+    labs(x = "Passenger Class", #changes x-axis label
+         y = "Percentages", #changes y-axis label
+         title = "Comparing Survival Rates by Passenger Class",
+         subtitle = "Titanic Disaster",
+         caption = "(And this is why I won't go on a cruise... I can't afford first class.)"
+         ) + 
+    
+    # make the y axis look "nicer"
+    scale_y_continuous(breaks = seq(0,1,by=.1), # show every 10%
+                       labels = scales::percent # format percents
+                       ) +
+    
+    # remove gray background
+    theme_bw()
+```
+
+### Mosaic plots
+Another common plot is a mosaic plot.
+```{r}
+titanic %>% with(
+    table(Gender, Survived)
+) %>% mosaicplot(color=T)
+```
+
+We can generate these with ggplot if we add a new package: `ggmosaic`. I will skip the details, but you can read about them [here](https://cran.r-project.org/web/packages/ggmosaic/vignettes/ggmosaic.html)

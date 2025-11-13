@@ -1,0 +1,210 @@
+---
+title: "Hypothesis Testing"
+subtitle: "All the whistles and bells"
+author: "P. Lombardo"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Loading packages, etc.
+```{r warning = F, message = F, echo = F}
+library(tidyverse)
+library(patchwork)
+library(broom)
+fish<-read.csv('data/fish.csv',header = T,
+               stringsAsFactors = T)
+MMs<-read.csv('data/MMs.csv',header=T,
+              stringsAsFactors = T)
+```
+
+## General Idea
+We have worked with hypothesis testing a little bit so far this course, so hopefully these ideas will feel familiar.  Let's formalize our approach below and introduce some common statistics terminology.
+
+1. In hypothesis testing, we always consider a claim *that we want to disprove*.
+    * We call this the *null hypothesis*, and it is usually denoted $H_0$.
+    
+2. As a researcher, we believe ***the claim is wrong***, which communicates our belief about the population parameter.
+    * We call our actual belief the *alternative hypothesis*, denoted $H_1$.
+    
+3. ***We assume the null hypothesis is true***, and this leads to a probability model for the sampling distribution under this assumption. (This may be a normal distribution, or a t-distribution, or a binomial distribution, or something entirely new!)
+    * I refer to this hypothetical sampling distribution as the "*Null Sampling Distribution*" because this is how the sampling distribution would look *if the **null** hypothesis were true*.
+    
+4. Using the probability model of the null sampling distribution from step 3, we compute a $P$-value: *the probability of seeing a sample statistic like ours, **or something more extreme***, given that the null hypothesis is true.
+    * the alternative hypothesis ($H_1$) provides meaning to "more extreme", and gives rise to our types of tests: right-tailed, two-tailed, and left-tailed.
+    
+5. There are two possible conclusions:
+    a. The $P$-value is "small" (below a chosen threshold, usually 0.05), so we have sufficient evidence against the null hypothesis.
+    b. The $P$-value is "big" (above our chosen threshold), so we have failed to provide evidence against the null hypothesis.
+    
+The threshold of 5\% has a meaning we'll see soon, but like a confidence level for C.I.'s, it can be changed to suit the preference of the researcher.  This "threshold" is called the ***significance level*** in statistics it's often denoted with $\alpha$.  
+
+Once again, commit this to memory:
+
+* $P$-value $< \alpha$; reject $H_0$;
+* $P$-value $\geq \alpha$; ***fail to reject*** $H_0$.
+
+## Trees Example
+Remember our `trees` example?  Let's test the claim that the population mean height is 72 feet.  As a long-time black cherry tree observer, you believe the mean height is actually *larger*. Let's run a hypothesis test.
+
+Set your hypotheses about $\mu$, the population mean height:
+
+* $H_0$: $\mu$ ....
+* $H_1$: $\mu$ ....
+
+So this is a _______-tailed test.
+
+Check your assumptions: Are we drawing from a normal population? What is the sample size?
+```{r}
+
+```
+
+We will run the test using `t.test()`.  (Look familiar?) 
+
+* When hypothesis testing, `t.test()` takes an argument `mu` to set the null hypothesis assumption, and uses `alternative` to indicate the kind of test. Let's fill in the '...' to complete the analysis.
+```{r}
+trees %>% select(...) %>%
+    t.test(mu = ...,
+           alternative = "...") %>%
+    tidy() %>% select(p.value)
+```
+
+What can we conclude if we want to use a *signficance level* of $\alpha = 0.02$?
+
+<answer here.>
+
+
+#### Hypothesis Testing Process
+Our hypothesis testing process will proceed as follows:
+
+1. Write your hypotheses and determine the type of test.
+2. Prepare the data and check the assumptions before running the analysis
+3. Use the appropriate `R` function to run the analysis.
+4. Write an appropriate conclusion based on how the $P$-value compares to your chosen significance level $\alpha$.
+
+## Further examples with means
+**Example.** Recall `fish` data frame contains weights from a random sample of a few different species of tuna. A local fisherman claims that "bigeye" tunas have a mean weight of 23 pounds.  We believe that's wrong, but are not sure whether it is too big or too small of an estimate. Test the claim using a significance level of 0.04.
+
+*Show your work below:*
+
+
+
+
+***
+
+**Example.** Using a significance level of 3\%, test the claim that the mean weight of "tongol" tuna is 20.25 pounds or more.  We believe that the mean weight is smaller.
+
+*Show your work below:*
+
+
+
+
+***
+
+## Examples with percentages
+When testing claims about a population percentage, we will follow the same main steps. However, our null and alternative hypotheses involve claims about $p$, and we'll use `prop.test()` to get our $P$-values!
+
+
+**Example:**  Assume that the `fish` data set came from a random sample of tuna caught off the coast of MA.  A snooty out-of-towner says that 39\% of the tuna caught in this area are "bigeye"; we believe that percentage is too large to be correct.
+
+* $H_0$: $p$...
+* $H_1$: $p$...
+
+So this is a _______-tailed test.
+
+Check your assumptions: what are $np$ and $n(1-p)$? 
+
+(*Notice $p$ is the assumed population percentage!*)
+
+
+```{r}
+#place code here.
+```
+
+We will run the analysis using `prop.test()`.  
+
+* When hypothesis testing, `prop.test()` takes an argument `p` to set the null hypothesis assumption, and also uses `alternative` to indicate the kind of test. 
+* The argument `x` is the count for the category of interest, and `n` is the general sample size.
+* As with confidence intervals, it's best to compute a table of counts first, and then provide that information into `prop.test()`
+
+```{r}
+# summary table of counts for species
+
+#
+prop.test(x = ...,
+          n = ...,
+          p = ...,
+          alternative = "...")
+```
+
+What can we conclude if we want to use a *signficance level* of $\alpha = 0.05$?
+
+<answer here.>
+
+**Quick Note:** the `prop.test()` command does not exactly use the CLT approach we outlined in a previous lesson. However, it's close enough for us not to sweat the details.  For those interested, I shared a few different approaches in the bonus material at the end of this lesson.
+
+**Example:** A friend claims that the percentage of "blue" M\&Ms produced at a factory is 30\%. We believe this is incorrect, but we're not sure if the estimate is too small or too big.
+
+Let's test this claim using a hypothesis test and the data in the data frame `MMs`.
+
+*Set your hypotheses, summarize the sample data, and check your assumptions.*
+
+
+
+
+
+Can we use `prop.test()` if we don't satisfy our assumptions? 
+
+**Technically, you shouldn't.**
+
+However, we can use an alternative test called the *Binomial Exact Test*, which relies on a different probability model to describe the sampling distribution.
+
+The Binomial Exact test using a command called `binom.test()`.  Luckily, the arguments for `binom.test()` are identical to `prop.test()`:
+
+```{r}
+binom.test(x = ...,
+           n = ...,
+           p = ...,
+           alternative = "...")
+```
+
+What can we conclude if we want to use a *signficance level* of $\alpha = 0.08$?
+
+<answer here.>
+
+
+
+## Conclusions and notes
+
+Hopefully you are starting to get comfortable with hypothesis testing and confidence intervals, whether we are working with means or percentages.  We have also introduced some *terminology* to go with each technique. In the next few lessons, we extend these basic ideas and process to allow us to compare means or percentages between two groups.
+
+For those interested, the Binomial Exact Test takes advantage of the fact that the sampling distribution *of counts* when drawing from a population follows a Binomial Distribution (just a different probability model) without any assumptions about having "large" sample sizes.  It's a really nice tweak.
+
+
+## Bonus!
+There are several ways to run a hypothesis test for our fish example above.  Below I list several approaches that different statisticians may prefer. My main point here is that although the $P$-values differ, they are relatively close and all tell the same story: *evidence to reject the claim!*
+```{r}
+options(scipen=999)
+#our orignal prop.test()
+prop.test(x = 43, n = 139, p = .39,
+          alternative = "less")$p.value
+
+# prop.test() dropping the "continuity correction"
+prop.test(x = 43, n = 139, p = .39,
+          alternative = "less",
+          correct = FALSE)$p.value
+
+# Our binomial test from our first hypothesis test exploration
+binom.test(x = 43, n = 139, p = .39,
+          alternative = "less")$p.value
+
+# Our CLT approach that uses a normal distribution to approximate the sampling distribution of percentges.
+ph<-43/139
+pnorm(ph,.39, sqrt(ph*(1-ph)/139))
+
+#  Our CLT approach with a "continuity correction" 
+pnorm((43+.5)/139,.39,sqrt(ph*(1-ph)/139))
+
+# A "bootstrap" $P$-value using simulation:
+mean(rbinom(10000,139,.39)<=43)
+```

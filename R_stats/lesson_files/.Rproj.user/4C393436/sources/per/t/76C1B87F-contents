@@ -1,0 +1,113 @@
+---
+title: "Simple Linear Regression"
+subtitle: "Sick of stats? Get in line!"
+author: "P. Lombardo"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Loading packages, etc.
+```{r warning = F, message = F}
+library(tidyverse)
+library(patchwork)
+library(DescTools)
+library(broom)
+
+knitr::opts_chunk$set(
+  fig.width = 5, fig.height = 4.2, fig.align = 'center'
+)
+
+skincancer<-read.csv('data/StateSkinCancer.csv', header = T,
+                     stringsAsFactors = T)
+cancerlm<-lm(mortality~latitude, data = skincancer)
+
+wine<-read.csv('data/wine.csv', header = T, 
+               stringsAsFactors = T)
+
+bboom<-read.csv('data/babyboom_nonlin.csv',header = T,
+                     stringsAsFactors = T)
+
+# fake "nice" data:
+set.seed(15123)
+x<-rnorm(100,100,10)
+y<-1.4*x - 50 + rnorm(100,0,12)
+good_lm_data<-data.frame(x = x, y = y)
+```
+
+## Exploring with the `wine` data set
+
+Some research questions:
+
+* Is there an association between `Malic.acid` and `Phenols` when all wine types are considered together? *Specifically,* we believe that as malic acid content increases, phenols will decrease. 
+
+* Assuming a relationship exists, treat `Malic.acid` as the response variable.  Fit and interpret a regression analysis for this relationship.  
+
+* Create visuals!
+```{r}
+# Explore here.
+```
+
+
+## Modeling assumptions
+The following data, `bboom` looks at birth rates from the years 1940 through about 1995.  Let's visualize this, and overlay a linear regression line:
+
+```{r}
+# place code here
+```
+
+***What's the problem with linear regression in this setting?***
+
+If we didn't visualize first, what would our analysis say?
+```{r}
+# place code here
+```
+
+## Linear Regression modeling assumptions:
+We have the **L**.**I**.**N**.**E**. assumptions:
+
+* **L**: Linearity of the response/explanatory relationship.
+* **I**: Independence of the residuals.
+* **N**: Normality of the residuals.
+* **E**: Equal variances across all
+
+Checking these assumptions visually.
+
+#### A "good" model example
+```{r}
+# place code here.
+good.model<-lm(y~x, data = good_lm_data)
+```
+
+#### A "not-so-good" model example
+```{r}
+# look at the baby-boomer model
+```
+
+***
+
+***What do we want from these "modeling assumption visuals"?***
+
+1) The Residual versus fitted plot:
+
+* ...
+* ...
+
+2) The QQ-plot
+
+* ...
+* ...
+
+
+> **Main idea:** If your residual vs. fitted plot, or the qq-plot, do not seem to follow what you're hoping for, this indicates you may be violating an important modeling assumption.  Get some extra eyes on the problem and ask an expert or someone with some more training in linear models.
+
+
+## Exploring the `iris` data frame: Petal.Width ~ Sepal.Width.
+Let's build out this analysis together!
+
+**Work here:**
+
+
+
+
+***

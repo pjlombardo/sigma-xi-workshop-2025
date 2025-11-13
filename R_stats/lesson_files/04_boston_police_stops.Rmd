@@ -1,0 +1,128 @@
+---
+title: "Exploring Boston Police Stops Data"
+subtitle: "Practice with Categorical Variables"
+author: "P. Lombardo"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Loading packages and data
+```{r}
+library(tidyverse)
+bps<-read.csv('data/bps2.csv', header = T,
+              stringsAsFactors = T)
+```
+
+Let's consider an example using the Boston Police Stop Data from 2019. I retrieved this data from [boston.gov](https://www.boston.gov/civic-engagement/boston-police-accountability-and-transparency-data), specifically the [BPD FIO data](https://data.boston.gov/dataset/boston-police-department-fio)
+
+* Those interested in similar analysis might find Dr. Matthew Ross' article interesting: [Massachusetts Traffic Stops Analysis, 2014-2022](https://impactengines.northeastern.edu/project/mass-trafficstops-2023/)
+
+## Our data
+
+Let's begin by exploring the data frame a bit.
+
+What information do *you* want to know? Let's brainstorm together:
+
+* 
+
+OK, here are some commands to pull that information:
+
+```{r}
+# Explore here
+```
+
+
+## Considering Time of Day
+Consider the `TimeOfDay` variable.  What kind of relationship does this have to stops by the police?
+
+```{r}
+#place code here
+```
+
+
+Plan:
+
+* 
+
+```{r}
+# Place code here.
+```
+
+
+## Adding Age Demographics
+Suppose we are interested in the mixture of age groups being pulled over at different times of day.
+
+What kind of summary would help us think about this relationship? How will you interpret this summary table?
+
+<answer here>
+
+Create the table above using the `table()` command; we've set up a "shell" to fill in:
+```{r}
+# Place code here
+bps %>% 
+    select(...) %>% 
+    table() %>%
+    prop.table(...) %>% 
+    addmargins()
+```
+
+*Note*: the `addmargins()` command will add row and column totals automatically. I like to use this to check that I used the correct margin.
+
+Create an appropriate visual and explain what it tells you about the relationship we are exploring. Once again, I provide a shell:
+```{r}
+#place code here.
+ggplot(data = bps,   # assign data frame
+       aes(...))+    # set the main aesthetics
+    geom_bar(...)    # add the geometry layer
+```
+
+**Exercise.** What does this plot tell us? *How* does it tell us that?
+
+# Do your own exploration!
+Pick two categorical variables from the `bps` data frame, and explore on your own or with a partner.  Please
+
+* Compute at least one table of counts or percentages, and interpret what "message" this table communicate to you.
+* Compute at least one visual based on your summary table, and explain how this visual communicates the same "message".
+
+
+****
+
+### (Optional)  More ggplot modifications!
+When names get cut off...
+```{r}
+ggplot(data = bps,
+       aes(x = race, fill = sex))+
+    geom_bar()
+```
+Yikes!
+
+Here's a work-around from [stack overflow](https://stackoverflow.com/questions/21878974/wrap-long-axis-labels-via-labeller-label-wrap-in-ggplot2) 
+```{r}
+ggplot(data = bps,
+       aes(x = race, fill = sex))+
+    geom_bar() +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+```
+
+I know, I know, ... but alphabetical order makes this ugly too. Can't we order this by largest to smallest size for the groups?
+
+Yes, but again, it involves a little extra coding.  In this case, we can use something from the tidyverse.  Here is the code, but it probably won't make much sense for another few weeks.  Just giving you a preview!
+```{r}
+bps %>% 
+    # We can use mutate to "recreate" the race variable, but order
+    # the factor levels by frequency
+    mutate(
+    race_ordered = fct_infreq(race)
+    ) %>%
+    
+    # now we create our plot (This is the original code from above.)
+    ggplot(data = .,
+       aes(x = race_ordered, fill = sex))+
+    geom_bar() +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))+
+    
+    # change color scheme for good measure
+    scale_fill_brewer(palette = "Set1")
+```
+

@@ -1,0 +1,88 @@
+---
+title: "Hypothesis Testing Errors"
+subtitle: "C'mon... what could go wrong? Part Deux!"
+author: "P. Lombardo"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Loading packages, etc.
+```{r}
+library(tidyverse)
+library(patchwork)
+library(DescTools)
+library(broom)
+source("source_files/HT_errors_ANOVA.R")
+```
+
+
+## Exploring Type II Error rates
+
+A ***Type II Error*** occurs when we the results of our hypothesis test _**incorrectly tell us to fail to reject $H_0$**_. 
+ 
+* Type II Errors only occur when the null hypothesis is false   
+* In these cases, we will have our $P$-value > $\alpha$; since $H_0$ is false, this has us make the *wrong conclusion* of failing to reject $H_0$.
+* Summary: the null hypothesis is *actually* false, but because of other factors our sample gave us no reason to reject it.  (We will explore such factors below.)
+
+**EVERY HYPOTHESIS TEST IS IN DANGER OF MAKING THIS MISTAKE** 
+
+Naturally, however, we want to minimize the *likelihood* of this occurring. Let's use our functions from before to explore type II error rates. 
+
+To better explore type II error rates, we lean on the `pvalue_sim()` function, which collects 2,000 $P$-values from hypothesis tests drawing from a population with a population mean of 100.
+
+* ***Since our function is set up to sample from a population with a mean of 100,*** to make the null hypothesis *false* we could set `null_mu = 90`. (This is not the only `null_mu` that makes the null hypothesis false, but it's a nice one to start with.)
+
+Let's assume we use a sample size of `n=30` and the population standard deviation is `sigma= 20`.  Use `pvalue_sim()` to generate some simulated $P$-values:
+```{r}
+pvals<-pvalue_sim(null_mu =90,
+                  # Note the null_mu = 90 makes the
+                  # null hypothesis false!
+                  n = 30,
+                  sigma = 20)
+```
+
+**How many of these simulated $P$-values would lead us to *fail to reject* our null hypothesis?**  Assume $\alpha = 0.05$.
+```{r}
+#Place code here.
+```
+
+Let's visualize our $P$-values:
+```{r}
+hist_with_alpha(pvals,0.05,breaks = 1:50/50)
+```
+
+1. **What do you notice about the *shape* of the histogram for $P$-values when the null hypothesis is *false*?**
+
+<answer here.>
+
+2. How does this *shape* of the histogram for $P$-values differ from the case where the null hypothesis was true?  
+
+<answer here.>
+
+#### Time permitting: what affects the Type II error Rate?
+
+Remember that our simulations sample from a population ***where the true population mean is 100***.  So to work with Type II Errors, we need to make sure we choose `null_mu` values away from 100. Note that the code below provides the percentage of tests that *incorrectly tell us to "fail to reject" the null hypothesis!*
+
+Let's play around with our *incorrect* null hypothesis of $\mu = 90$ by changing:
+
+* $n$, our sample size
+* $\sigma$, how much variation in the population there is,
+* $alpha$, the significance level of the test.
+
+```{r}
+typeII_rate(null_mu = 90, 
+            n = 30, 
+            sigma = 15,
+            alpha = 0.05)
+
+# Power is  (1 - Type II Error Rate)  or 1 - \beta
+```
+
+
+***
+
+You can use this [$P$-value distribution](https://stem.endicott.edu/pl-shiny/power/p-vals-distribution/) interactive visualization to explore these ideas as well.  The simulator draws samples from a population with a mean of 100 (as our example above), so leaving setting the null hypothesis to values ***NOT EQUAL*** to 100 will let you explore **Type II errors.**
+
+***
+

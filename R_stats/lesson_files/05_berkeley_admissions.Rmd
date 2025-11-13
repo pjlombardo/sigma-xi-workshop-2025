@@ -1,0 +1,48 @@
+---
+title: "Exploring Berkeley Admissions Data"
+subtitle: "Practice with Categorical Variables"
+author: "P. Lombardo"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Loading packages and data
+```{r}
+library(tidyverse)
+berkeley<-read.csv('data/berkeley.csv', header = T,
+              stringsAsFactors = T)
+```
+
+## Getting started with statistical thinking
+Above we loaded the Berkeley data set, which looks at acceptance rates to programs in 1973. 
+
+How many variables are there in this data set? What are they?
+```{r}
+#place code here
+```
+
+The original intent of this data was to explore whether there was a gender bias in Berkeley college admissions at that time.  What initial summary helps us answer this question?
+
+Compute this summary below and create a visual for it:
+```{r}
+#place code here
+```
+
+Often in *observational studies*, where there is no experimental assignment of a treatment, a "confounding variable" can have an influencing effect on the research question, making a straightforward analysis like the one we did above not really capture the nuance of the situation.
+
+With this in mind, create a summary table that compares acceptance rates for males and females, ***but broken up by `Major`***.  As usual, provide an appropriate visual as well.
+```{r}
+#place code here
+```
+
+What do you notice?  Something surprising?
+```{r}
+# place code here
+```
+
+This is an example of something called [Simpson's Paradox](https://en.wikipedia.org/wiki/Simpson%27s_paradox), where there is a clear trend when data is considered by groups separately, but that trend *reverses or disappears* when they groups are aggregated and treated as one.
+
+Tricky, tricky, tricky....
+
+Let's use the remaining time to get started on our lab for the weekend!

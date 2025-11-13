@@ -1,0 +1,104 @@
+---
+title: "Chi-squared Test of Independence"
+author: "P. Lombardo"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Loading packages, etc.
+```{r}
+library(tidyverse)
+library(broom)
+library(patchwork)
+library(DescTools)
+gss<-read.csv('data/gss.csv', header = T, 
+              stringsAsFactors = T)
+hands<-read.csv('data/lefthands.csv',header = T,
+                stringsAsFactors = T)
+titanic<-read.csv('data/titanic.csv', header = T,
+                  stringsAsFactors = T)
+berkeley<-read.csv('data/berkeley.csv', header = T,
+                   stringsAsFactors = T)
+```
+
+## What if we want to compare percentages ***across several groups***?
+When comparing means, we saw that if our explanatory variable had 3 or more groups we required an ANOVA to combat type I error rate inflation.  What about comparisons with percentages?
+
+An analagous hypothesis test to an ANOVA that applies to percentages is the *chi-squared test for independence*.
+
+* The explanatory variable and response variable must be categorical, but they can have as many "levels" as you want.
+* The null hypothesis is that among all the groups, the percentages associated with the response variable are all equal. (This is more succinctly stated as the two categorical variables are "independent".)
+* Like the ANOVA, it can provide evidence for an *association*, but it will not give insight to which group has higher/lower percentage values for a given level of the response variable. ("Omnibus test")
+
+## Examples
+
+### The Titanic Disaster
+Let's look at how passenger class (three levels) may have an association with survival.
+
+* Visualize:
+```{r}
+#place code here
+```
+
+* Summarize:
+```{r}
+#place code here
+```
+
+* Run the `chisq.test()` and interpret
+```{r}
+titanic %>% select(Pclass, Survived) %>%
+    table() %>%
+    chisq.test()
+```
+
+#### Testing assumptions:
+There are the usual assumptions of independence in the sampling process, the requirement that the levels are all mutually exclusive, and each unit can only contribute to one cell in the summary table.  But we also require:
+
+> At least 80\% of the cells in the summary count table must have ***an expected count** above 5.
+
+```{r}
+results<-titanic %>% select(Pclass, Survived) %>%
+    table() %>%
+    chisq.test()
+results$expected
+
+# or
+titanic %>% select(Pclass, Survived) %>%
+    table() %>%
+    chisq.test() %>% .$expected
+```
+
+***
+
+What if we do want a directional test? For example, what if we want to provide evidence that third class passengers had worse survival rates?
+
+* In this case, I'd recommend creating a new variable so that your explanatory and response variables only have two levels, and then running a difference in percentages comparison.
+    * There are other tests, like odds ratios and relative risk, which are used often (especially in medicine). However, we will not have time to discuss these.
+    
+***
+
+### Berkeley Admissions
+Let's revisit our Berkeley admissions data and explore some associations with admissions.
+```{r}
+berkeley %>% str()
+```
+
+
+
+### `gss`, political party, and college degrees!
+Let's explore an association between political part and college degrees!
+```{r}
+gss %>%str()
+```
+
+
+### Left-handed or right-handed?
+Let's explore whether Endicott is different from the U.S. population in terms of left and right-handed people.
+
+```{r}
+hands %>% str()
+```
+
+

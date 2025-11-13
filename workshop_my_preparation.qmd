@@ -1,0 +1,376 @@
+---
+title: "Sigma Xi Fall 2025 Workshop"
+format: html
+editor: visual
+---
+
+## Getting Started
+
+## Loading Data and packages
+
+```{r}
+library(tidyverse)
+library(broom)
+library(patchwork)
+library(car)
+
+# df is short for data frame, which is like our "excel sheet"
+df <- read.csv('data/spotify-2023.csv')
+# don't worry about this...
+names(df)<-names(df) %>% gsub("_.$","",.)
+```
+
+## General Overview
+
+Before diving in, let's look at the slides for a little overview.
+
+#### The "Piping" Approach
+
+The piping character `%>%`, from the `magittr` package, make code more readable.
+
+`fxn2( fxn1( x ) )` can be rewritten `x %>% fxn1() %>% fxn2()`.
+
+Notice how you can read left-to-right to see the order of execution, rather than having to think "move from inside-to-out." I, and hopefully you, will find the second approach using the piping operator easier to work with.
+
+Here's an applied example.
+
+```{r}
+round(mean(df$valence),3)
+
+# breaks on purpose
+df %>%
+    # select(valence) %>%
+    pull(valence) %>%  # this was the correction
+    mean() %>%
+    round(3)
+```
+
+#### Viewing the data
+
+```{r}
+# View(df)
+```
+
+```{r}
+df %>%
+    head(10)
+```
+
+## Summarizing data
+
+Making summary tables is pretty straightforward. We basically pass the data frame into a `summarize()` function, and add the summaries we want! (For quicker analysis, there are some shortcuts, like the `summary()` function.)
+
+Let's get an average beats-per-minute for our data:
+
+```{r}
+# breaks on purpose
+df %>% 
+    summarise(mean_bpm = mean(bpm), # add na.rm = T
+              std_dev_bpm = sd(bpm))
+```
+
+What if we want summaries broken up by a grouping variable?
+
+```{r}
+# place code below
+df %>% 
+    group_by(mode) %>%
+    summarise(mean_bpm = mean(bpm,na.rm = T))
+# add some more summaries, use AI to get a list of other summary functions
+
+```
+
+Using `rm.na = T` is sort of annoying, can we do it differently?
+
+------------------------------------------------------------------------
+
+Here's a nice recipe: *How many NA-values are there and where are they?*
+
+```{r}
+df %>% is.na() %>% colSums()
+```
+
+------------------------------------------------------------------------
+
+## Modifying data frames
+
+The `dplyr` package in the tidyverse lays out a nice language for making common changes to your data frames in preparation for analysis, summary, and plotting.
+
+-   **select** columns
+-   **filter** rows
+    -   NA values, other suggestions?
+-   **mutate** the data frame to include new variables
+    -   change the unit in streams
+    -   make a "summer" vs. "other" categorical variable
+
+```{r}
+# This breaks on purpose
+df_new <- df %>%
+    filter(!is.na(bpm), !is.na(danceability)) %>%
+    select(streams,mode, released_month, #uncomment released month
+           bpm, key, danceability, energy, liveness) %>%
+    mutate(
+        streams_mill = streams/1000000,
+        is_summer = ifelse(released_month %in% c(6, 7, 8), "Yes","No")
+    ) %>%
+    select(streams_mill, released_month, mode, key, bpm, 
+           danceability, energy, liveness)
+
+df_new %>% is.na() %>% colSums()
+```
+
+Let's add to the code above to remove NA-values and change the unit of the streams variables. Can we change the ordering of the columns?
+
+Try a summary using `df_new`, and this time don't bother with `na.rm = T`:
+
+```{r}
+df_new %>%
+    summarise(mean_bpm = mean(bpm))
+```
+
+## Visualizing data
+
+The `ggplot2` package in the tidyverse uses a "grammar of graphics" approach to building a plot. The whole idea boils down to making the plot in layers, like a Bob Ross painting.
+
+There are a few other terms to get down, but the general build follows this protocol:
+
+1.  Start the canvas
+2.  Connect to a data frame:
+3.  Set *aesthetics* (parts of the plot that are determined variables in your data)
+4.  Add *geometries* to draw the graphics
+5.  Bells and whistles:
+    -   axis labels
+    -   color, color palettes, themes
+    -   faceting
+    -   ...
+
+------------------------------------------------------------------------
+
+***Piping trick:*** If we want to pipe a data frame into a specific spot of a function that takes several arguments, we can by indicating the placement with a period: `.`
+
+E.g., `df %>% my_fxn(x = 10, y = .)` will be the same as `my_fxn(x = 10, y = df)`
+
+We will use this to pipe our data frames into block of ggplot2 code.
+
+------------------------------------------------------------------------
+
+Building a basic scatter plot:
+
+```{r}
+#let's build a scatter plot
+df_new %>%
+    ggplot(data = .,
+           aes(x = energy, y = streams_mill, color = mode))+
+    geom_point()+
+    facet_wrap(vars(as.factor(released_month)))+
+    theme_bw()
+```
+
+#### Basic boxplot
+
+```{r}
+# let's have chatGPT this. How can you make a boxplot using ggplot2?
+df_new %>%
+    ggplot(data = .,
+           aes(x = mode, y = danceability))+
+    geom_boxplot()
+
+```
+
+Let's break this down:
+
+-   *aesthetics*: `mode` (x-axis), `danceability` (y-axis).
+-   *geometries*: boxplot (what else do you call it?)
+
+#### Adding layers
+
+Let's keep "painting" our plot. We'll add a touch of color, and overlay some data on top.
+
+-   Any new aesthetics?
+-   Any new geometries?
+
+```{r}
+df_new %>% 
+    filter(!is.na(danceability),
+           !is.na(mode)) %>%
+    ggplot(data = .,
+           aes(x = mode, y = danceability))+
+    geom_boxplot(fill = 'blue',alpha = .2, linewidth =1) + 
+    # geom_jitter(width = .1, alpha = .5, col = 'blue')+
+    theme_bw()
+
+# ggsave('my_bxplot.png')
+```
+
+#### What else would you like to do?
+
+I'm open to suggestion!
+
+#### Here's a fancy example.
+
+This requires a package called `patchwork`, which I very much like for putting multiple plots together. Should we install it and see what this makes?
+
+```{r}
+p2<-df_new %>% 
+    filter(!is.na(danceability),
+           !is.na(mode)) %>%
+    ggplot(data = .,
+           aes(x = mode, y = danceability, color = mode, fill = mode))+
+    geom_boxplot(color = 'black',alpha = .2, linewidth =1) + 
+    geom_jitter(width = .1, alpha = .2)+
+    theme_bw()+
+    scale_color_manual(values = c("blue","red"))+
+    scale_fill_manual(values = c("blue","red"))+
+    theme(legend.position = "none")+
+    ylab("")
+
+p1<-df_new %>% 
+    filter(!is.na(danceability),
+           !is.na(mode),
+           mode == "Major") %>%
+    ggplot(data = .,
+           aes(x = danceability))+
+    geom_histogram(bins = 15, color='white',
+                   fill = 'blue', alpha = .5)+
+    theme_bw()+coord_flip()+ylab("Major")+scale_y_reverse()
+
+p3<-df_new %>% 
+    filter(!is.na(danceability),
+           !is.na(mode),
+           mode == "Minor") %>%
+    ggplot(data = .,
+           aes(x = danceability))+
+    geom_histogram(bins = 15, color='white',
+                   fill = 'red', alpha = .5)+
+    theme_bw()+xlab("")+ylab("Minor")+coord_flip()
+
+layout <- "
+ABBBC
+ABBBC
+ABBBC
+"
+p1+p2+p3 +plot_layout(design=layout)+
+    plot_annotation(title = "Butterfly Plot?")
+```
+
+## Statistical testing
+
+`R` was written by statisticians, so of course there are some core functions that will do statistical testing and reporting for us!
+
+These functions use the following shorthand to differentiate the dependent variable from the independent variables:
+
+> `dependent_var ~ independent_var`
+
+This will appear in many common statistic testing functions, like `t.test()`, `aov()`, and `lm()`.
+
+#### Comparative $t$-test
+
+Running a two-sample $t$-test is pretty straightforward. We share
+
+```{r}
+# we already got rid of the NAs in pre-processing, so...
+
+# breaks on purpose
+# AI does NOT give the right response!  Read the error message though
+df_new %>%
+    # t.test(danceability~released_month, data = .) %>% # too many groups
+    t.test(danceability~mode, data = .) %>%
+    tidy() %>%
+    select(p.value)
+```
+
+### Fitted models: ANOVA and Linear Regression
+
+In `R`, certain models require that your "fit" them first before viewing the results.
+
+#### ANOVA
+
+We fit a model with the `aov()` function; luckily, the syntax is identical to the $t$-test command.
+
+```{r}
+df_new %>%
+    filter(!is.na(danceability),
+           !is.na(key)) %>% 
+    aov(danceability~key, data = .) -> my_anova_fit
+
+my_anova_fit %>% tidy()
+
+# review, summary tables
+df_new %>%
+    filter(!is.na(danceability),
+           !is.na(key)) %>%
+    group_by(key) %>%
+    summarise(mean = mean(danceability),
+              sd =sd(danceability), 
+              sample_size = n())
+
+# review, nice visualization
+df_new %>%
+    filter(!is.na(danceability),
+           !is.na(key)) %>%
+    ggplot(data = .,
+           aes(x= key, y = danceability))+
+    geom_boxplot() + 
+    geom_jitter(alpha= .2,width = .1)+theme_bw()
+```
+
+Could do a two way ANOVA example, if there's interest. The `ToothGrowth` data set pre-loaded in `R` gives you a two-way ANOVA with significant main, blocking, and interaction.
+
+#### Regression
+
+We fit a linear regression model with the `lm()` function; luckily, the syntax is identical to the previous two commands.
+
+```{r}
+df_new %>%
+    lm(danceability ~ energy, data = .) -> my_regression_fit
+
+# coefficients table
+my_regression_fit%>%
+    tidy()
+
+# R-square, F-statistics and P-value, etc
+my_regression_fit %>% 
+    glance()
+
+# this gives observation-specific measures, like fitted values
+# and residuals
+my_regression_fit%>%
+    augment()
+
+# summaries
+df_new %>%
+    summarise(correlation = cor(danceability, energy),
+              sample_size = n())
+
+# plot
+df_new %>%
+    filter(!is.na(danceability),
+           !is.na(energy)) %>%
+    ggplot(data = .,
+           aes(x = energy, y = danceability))+
+    geom_point(alpha = .4)+
+    geom_smooth(method = 'lm', formula = 'y~x', se = F)+
+    theme_minimal()
+    
+```
+
+## What else do you need R to do?
+
+## In case there's time...
+
+```{r}
+source('my_fxns/anova_fxn.R')
+```
+
+```{r}
+# df_new %>%
+#     mutate(key = as.factor(key)) %>%
+# plot_anova_stuff(streams_mill ~ key, data = ., bins = 10,
+#                  dec2=8)
+
+plot_anova_stuff(Petal.Width~Species, data = iris, bins = 10,
+                 dec2=8)
+
+# plot_anova_stuff(weight~feed, data = chickwts, bins = 10,
+#                  dec2=8)
+```

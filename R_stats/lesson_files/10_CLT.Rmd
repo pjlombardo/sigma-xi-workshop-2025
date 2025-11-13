@@ -1,0 +1,138 @@
+---
+title: "The Central Limit Theorem"
+author: "P. Lombardo"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Loading packages, etc.
+```{r}
+library(tidyverse)
+library(patchwork)
+labradors<-read.csv('data/labradors.csv',header = T)
+source('source_files/CLT.R')
+```
+
+
+## Central Limit Theorem
+As noted in the previous lesson, we cannot generate sampling distributions in practical situations. So how do we access the necessary "aggregate behavior" of sampled statistics and use it to our benefit?  
+
+The Central Limit Theorem, at its core, simply shows that many common sampling distributions can be modeled well by a normal distribution. And don't worry, it provides formulas for the parameters too!
+
+Here are two important "translations" of the Central Limit Theorem that will be applicable to us in the near future.
+
+### CLT for proportions
+Let's assume the actual population percentage is $p$, and we consider samples of size $n$.
+
+* **Assumptions:** If we have $np > 10$ and $n(1-p)>10$, the CLT applies reasonably well.
+* **Result:** The sampling distribution of sample percentages ($\hat p$) can be modeled with a normal distribution where
+    * the mean is $p$, and
+    * the standard deviation is $\sqrt{p(1-p)/n}$.
+
+**Example.** Suppose there is a jar of Jelly beans, and we have to guess the percentage of green jelly beans in the jar.  We can access a random sample of 200 jelly beans.
+
+* I pre-loaded a *simulated sampling distribution* of percents, `samp_dist_pct`, based on samples of size 200.
+* The actual percentage of green in the entire jar was 0.09146. 
+
+Let's compare the sampling distribution against the CLT predictions!
+```{r}
+# parameters
+# mu = 0.09146
+
+# sigma = sqrt(0.09146*(1-0.09146)/200)
+
+#On your own, try out a probability versus percentage comparison
+
+```
+
+Let's visualize
+```{r}
+# use bins = 10
+compare_sampdist_norm(...)
+```
+
+
+### CLT for means
+Let's assume the actual population mean is $\mu$, the population standard deviation is $\sigma$, and we consider samples of size $n$.
+
+* **Assumptions:** For most populations, if $n>30$ then we can assume the Central Limit Theorem applies reasonably well. 
+* **Result:** The sampling distribution of sample means ($\bar x$) can be modeled with a normal distribution where
+    * the mean is $\mu$, and
+    * the standard deviation is $\sigma/\sqrt{n}$.
+
+**Example.** We already generated *simulated sampling distribution* of mean heights for our `people` data under the name `samp_dist_means`, assuming samples of size 50.  Moreover, recall that the population of heights had the following parameters: 
+```{r}
+people %>% summarise(
+    mean = mean(heights),
+    sd = sd(heights)
+)
+```
+
+Let's compare the sampling distribution against the CLT predictions!
+```{r}
+# parameters
+# mu = ...
+
+# sigma = ...
+
+#On your own, try out a probability versus percentage comparison
+
+```
+
+Let's visualize:
+```{r}
+compare_sampdist_norm(...)
+```
+
+
+## Wait just a minute...
+*Since when* do we know population parameters like $p$, or $\mu$ and $\sigma$?
+
+And what about these *Assumptions*; what if we don't meet them? Then what?
+
+Yes, well, we keep adapting.
+
+Hopefully though, you're at least convinced that we can replace the *simulated sampling* approach with an appropriate probability model, and still accurately compute probabilities and estimate the standard deviation of a sampling distribution. 
+
+
+## Central Limit Theorem Problems
+In the examples we present below, we start laying the foundation for how we will use the Central Limit Theorem to do statistical inference. In addition to applying the Central Limit Theorem, we explore the *logic* and important ideas that underly our two main techniques.
+
+
+### An application with percentages (Hypothesis Testing)
+Suppose that a friend of your claims that 50\% of all Labrador Retrievers have a brown coat (chocolate labs).  You are pretty sure that your friend is wrong, but how can you demonstrate that?
+
+You decide to use a data driven approach, and so through the American Kennel Club, you get a random sample of 100 Labrador Retrievers: `labradors`.
+
+1. What percentage *of your sample* have brown coat?
+```{r}
+# place code here
+```
+
+2. *Assuming your friend is **correct***, what percentage of the sample would you have expected? Why?
+
+3. Does your sample summary seem "likely" *if your friend is correct?* Why or why not?
+
+4. *Assuming your friend is **correct***, what would the sampling distribution of the percentage of chocolate labs look like according to the central limit theorem (CLT)?
+
+5.  Using the normal distribution from the previous exercise, compute the probability of getting a sample percentage *like yours* (answer to question 1), or something smaller?
+
+6. Is the probability from question 5 big or small?  Explain how this provides evidence against your friend's claim.
+
+
+### An application with means (Confidence Intervals)
+Your sample of 100 Labrador retrievers also contains information on their weights, and we want to use that to make an educated *guess* about the mean weight for ***all*** Labradors ($\mu$).
+
+1. According to the central limit theorem, what is the mean and standard deviation of the sampling distribution of mean weights? (Your answer should be in terms of the population parameters $\mu$ and $\sigma$, the mean and standard deviation of individual Labrador weights.)
+
+2. According to the central limit theorem, will the sampling distribution of sample mean weights be normally distributed?
+
+2.  Does the *Empirical Rule* apply to the sampling distribution of sample mean weights? If so, where should we expect 95\% of potential sample means to fall?
+
+3. Said differently, for this "middle 95\%" of potential sample mean guesses, we will be at least how close to the actual population mean $\mu$?  
+
+4. Would increasing our sample size lead to guesses that are closer or farther away from the population mean? Can you use the CLT to explain why?
+
+
+

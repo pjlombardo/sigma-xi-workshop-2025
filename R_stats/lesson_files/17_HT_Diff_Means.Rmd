@@ -1,0 +1,133 @@
+---
+title: "Hypothesis Testing For Differences!"
+subtitle: "Two at a time please!"
+author: "P. Lombardo"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Loading packages, etc.
+```{r}
+library(tidyverse)
+library(patchwork)
+# library(DescTools)
+library(broom)
+fish <- read.csv('data/fish.csv', header = T, stringsAsFactors = T)
+```
+
+## Introduction
+We have already explore how to compare population means or population percentages between two populations using confidence intervals.  This technique relied on a version of the Central Limit Theorem applying the following statistics:
+
+1. The difference of sample means from two populations: $\bar x_1 - \bar x_2$.
+2. The different of sample percentages from two populations: $\hat p_1 - \hat p_2$.
+
+The good news is that hypothesis testing and confidence intervals work on the same underlying theory: a sampling distribution having a normal shape with formulas for the parameters.
+
+Remember that the parameters we estimate are always *differences*, so our hypotheses will be in terms of what we expect about $\mu_1 - \mu_2$  (or $p_1 - p_2$).
+
+This guide will be helpful to remember:
+
+* Two-tailed test:
+    * $H_0:\mu_1 - \mu_2 = 0$
+    * $H_1:\mu_1 - \mu_2 \neq 0$
+    * Intuitive meaning if reject null: $H_0:\mu_1 = \mu_2$
+    * `alternative = "two.sided"`
+
+* Right-tailed test:
+    * $H_0:\mu_1 - \mu_2 \leq 0$
+    * $H_1:\mu_1 - \mu_2 > 0$
+    * Intuitive meaning if reject null: $\mu_1 > \mu_2$
+    * `alternative = "greater"`
+    
+* left-tailed test:
+    * $H_0:\mu_1 - \mu_2 \geq 0$
+    * $H_1:\mu_1 - \mu_2 < 0$
+    * Intuitive meaning if reject null: $\mu_1 < \mu_2$
+    * `alternative = "less"`
+
+
+
+## `ToothGrowth` revisited
+
+Let's work once more with the `ToothGrowth` data set and test the claim that OJ leads to the same or less tooth growth over VC (vitamin C), when we consider only a dosage of 1.0 mg/day.
+
+0. How should we prepare our data?
+```{r}
+#Place code here
+```
+
+1. Who is group 1? Let's run a levels command to see which comes first.
+
+```{r}
+#place code here.
+```
+
+*What difference are we making a claim about? (Make the order clear.)*
+
+
+*What are the Null and Alternative Hypotheses?*
+
+* $H_0:...$
+* $H_1:...$
+
+*What type of test is this? How should we set `alternative = ...`*
+
+
+2. Assumptions of the hypothesis test:
+
+Here are the assumptions for the hypothesis test. Notice we have an additional assumption of "equal variances."
+
+* Either each group has at least 30 observations, or it is safe to assume we are sampling from two normal populations.
+```{r}
+# check sample sizes...
+```
+
+* The standard deviations are not wildly different (Three-fold-rule); let's use `group_by()` and `summarize()`:
+```{r}
+#place code here.
+```
+
+(*Note:* This standard deviation guideline is not strictly necessary with `t.test()` when `var.equal = FALSE`...)
+
+3. Let's develop our shortcut code:
+
+* Recall this is a right-tailed test, so `alternative = "greater"`
+* We have two variables now, a response and an explanatory variable.
+    * Response: ...
+    * Explanatory: ...
+    * `Response ~ Explanatory`
+
+
+```{r}
+#place code here...
+```
+
+
+4. Conclusion, assuming a significance level of 1\%:
+
+....
+
+
+## Returning to Fish
+Now let's practice on our own.
+
+0. Create a boxplot comparing all four species of tuna.
+
+*Show Work Below:*
+
+
+```{r}
+#place code here.
+```
+
+
+Pick two species of tuna, and compare a difference in their population mean weights *using a hypothesis test.*
+
+*Show Work Below:* (Follow the same steps as above.)
+
+
+```{r}
+#place code here.
+```
+

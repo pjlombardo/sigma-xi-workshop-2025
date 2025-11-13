@@ -1,0 +1,127 @@
+---
+title: "Intro to Categorical Variables"
+author: "P.Lombardo"
+output:
+  html_document:
+    df_print: paged
+---
+
+Before beginning, let's get used to loading the `R` packages we might need for analysis later.
+```{r}
+library(tidyverse)
+```
+The `tidyverse` is actually a collection of packages that all work well together, and it includes functions for data wrangling, plotting, and much more!  We will learn to use the tidyverse well this semester.
+
+# Exploring and Summarizing Categorical Variables
+
+Let's work with our titanic data set again.  Can you remember how to load this CSV file as a data frame in R?
+```{r}
+# Place your code here, or use the import data set button.
+```
+
+The `table()` command is a quick way to have `R` create tables of counts for categorical variables.  For example, the `Survived` variable in our titantic data set is a categorical variable (a "factor") with two "levels":
+
+  * Yes (indicating that person survived); and
+  * No (indicating that person died).
+
+Run the following command to count how many people survived.
+```{r}
+table(titanic$Survived)
+```
+
+How many survived?
+<Place your answer here>
+
+#### Exercise 1:
+How many females were on board the titanic according to this data set?
+```{r}
+#place your code here.
+```
+
+
+#### Exercise 2:
+What *percentage* of the passengers on board were male?
+```{r}
+#place your code here.
+
+```
+
+
+#### Exercise 3:
+Let's look into using `prop.table()` and the "piping operator", `%>%`.
+```{r}
+# place your code here.
+
+```
+
+
+****
+
+## Contingency tables for *two* categorical variables
+
+Can we find statistical evidence for the phrase?
+
+>``Women (and children) First."
+
+This involves exploring...
+
+* What would "evidence" involve? What variables do we need to look at? How should we summarize these variables?
+* If the evidence is in favor of the claim, what would it look like? What specifically would see in our summaries?
+
+
+We can create "contingency tables" (or cross tabs, there are many names) by passing two variables into the `table()` command.  Run the following code:
+```{r}
+table(titanic$Gender, titanic$Survived)
+
+# or the "piped" approach
+titanic %>%
+    select(Gender, Survived) %>%
+    table()
+```
+
+*Note*: whichever variable is "selected" first will appear as the rows, the second variable appears as the columns.
+
+
+#### Exercise 3:
+Explain what each number in the table counts; be specific and describe how the row and column labels tell you this information.
+
+<place your answer here>
+
+****
+
+#### Exercise 4:
+Using `R` as a calculator, use the numbers in the table above to compute the survival rate for men and the survival rate for women. 
+
+*Note*: the survival rate for men would be the percentage *of the males* that survived. 
+```{r}
+#place your code here
+```
+
+Which `Sex` had the higher survival rate?
+<place your answer here>
+
+****
+
+We can compute row or column percentages quickly by passing a table into the `prop.table()` command in choosing a `margin`.
+
+Try this code:
+```{r}
+titanic %>% 
+    select(Gender, Survived) %>% 
+    table() %>%
+    prop.table(margin =1)
+```
+
+#### Exercise 5:
+Answer the following questions:
+
+* What happens if you set `margin = 2`?
+    * What happens if you do not specify a "margin" at all?
+
+* Using a similar command as above, find the percentage of those that survived who were female.
+
+```{r}
+# place your code here.
+```
+
+

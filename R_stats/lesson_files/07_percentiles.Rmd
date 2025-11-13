@@ -1,0 +1,209 @@
+---
+title: "Percentiles and Boxplots"
+author: "P. Lombardo"
+output:
+  html_document: default
+---
+
+## Loading packages and data
+```{r}
+library(tidyverse)
+small_diamonds <-read.csv("data/small_diamonds.csv", header = T,
+                          stringsAsFactors = T)
+diamond_compare <-read.csv('data/diamond_compare.csv', 
+                           header =T, stringsAsFactors = T)
+source('source_files/general.R')
+```
+
+# Our data today
+The `diamonds` data set comes pre-loaded with the `ggplot2` library, but it is quite large.  To simplify a little, we will work with 400 randomly sampled diamonds from that data set; we store this information in the `small_diamonds` data frame.
+
+Let's explore
+```{r}
+small_diamonds %>% head()
+
+small_diamonds %>% str()
+```
+
+For data sets and functions that come pre-loaded into `R`, you can use a `?` to learn more about them.
+```{r}
+?diamonds
+```
+
+### Removing columns
+For this session, we will focus on just a small subset of the variables in `small_diamonds`. The `select()` function from the `dplyr` package allows us to *select* a subset of columns from a larger data frame.  
+
+Let's write some code together that creates a new data frame `diamonds2` that only contains the variables: `carat`, `cut`, `depth`, `price`.
+```{r}
+# First build the dplyr pipe and make sure you get the right data frame
+
+# Once you know your code is working, do an assignment to the shortcut name diamonds2.  You can do forward assignment -> or backward assignment <-.
+
+```
+
+## Percentiles
+Rough guide, my exam grade was better than 72\% of my classmates grades, I would say *I scored in the 72nd percentile*.  
+
+* Notice you do not need to know my actual grade to say this; it is simply a measure of where I stand among the other exam grades
+
+Often we want to reverse this situation: how high do I need to score in order to beat 85\% of my classmates? Said differently, *What is the 85th percentile score?*
+
+
+### Logical vectors and percentiles
+A logical vector is simply a vector of TRUE or FALSE values, but `R` uses them in a number of ways. In general, `R` will allow you to perform *quantitative* summaries on logical vectors, and it does this by treating:
+
+* TRUE is the same as 1
+* FALSE is the same as 0.
+
+This has some fun implications!  Yes, I really think this is fun... why do you ask?
+
+Run the following code and think about what it does:
+```{r}
+# first create a simple vector of numbers:
+numbers<- c(1, 2, 3, 4, 5, 6, 7)
+numbers
+# What does this code do?
+numbers < 4
+```
+
+<Explain in your own words>
+
+Now let's see how `R` will treat this "logical vector", `numbers < 4`, if we try to `sum()` it:
+```{r}
+sum(numbers<4)
+```
+
+**Exercise:** What percentage of the diamond prices in `diamonds2` are above the mean price?
+```{r}
+# Here's a guide (not the only way though):
+
+# Compute the mean, save it under mean_price
+
+# Create a logical vector for price values above  mean_price
+
+# Use the logical vector to find the total number of diamonds priced above the mean
+
+# take that total number and divide by the total rows in the data frame (nrow() helps)
+```
+
+The mean, 3655.418, is actually the _______ percentile! Is that what we usually expect?
+
+
+## The harder direction
+Suppose we are interested in the following question instead:
+
+* What is the 80th percentile for the `carat` measurement?  
+* Said differently, how many carats would a diamond need to weight in order to be heavier than 80\% of the other diamonds in the data set?
+
+We rely on the `quantile()` command to find these quickly.  To use this properly, you first put your data vector, then pass the percentile you want in next ***as a decimal***. Let's find the 80th percentile of the `carat` variable:
+```{r}
+#Place code here
+```
+
+Yes, we can use this as part of a `summarize()` table, so long as we only compute one percentile at a time. Try adding the 80th percentile to the table below.
+```{r}
+diamonds2 %>% 
+    summarise("mean (carat)" = mean(carat),
+              std.dev = sd(carat))
+```
+
+
+We can compute a bunch of percentiles at once by passing a vector of probabilities into the `probs = ` argument. For example, try putting `c(.1, .25, .5, .75, .9)` into that argument:
+```{r}
+# Place code here.
+```
+
+**Quartiles** are a fancy way of referring to the 25th, 50th, and 75th percentiles.  Specifically,
+
+* The first quartile $Q_1$ is the same as the 25th percentile $P_{25}$
+* The second quartile $Q_2$ is the same as the 50th percentile $P_{50}$ (also the median)
+* The third quartile $Q_3$ is the same as the 75th percentile $P_{75}$
+
+The `summary()` command is a great way to get the quartiles, as well as the min, max, and mean of the data set.  Try applying `summary()` to the 
+```{r}
+#  take your guess!
+```
+
+#### A new measure of variation
+We define the *inter-quartile range* (IQR) to be the difference between the third and first quartiles: Q3 - Q1.  The `IQR()` function computes this quickly in R.
+
+## Why do we ***care?***
+Let's compare two diamond collections. For a private collection, and for the Smithsonian collection, we randomly select 50 diamonds from each.
+
+Run the code below to compare the mean and standard deviation of the carat measurement for each collection.
+```{r}
+diamond_compare %>%
+    group_by(collection) %>%
+    summarise(mean = mean(carat),
+              std.dev = sd(carat)
+              ) %>%
+    # Remember you can only use flip_tibble() inside our lessons.
+    flip_tibble()
+```
+
+Now, add median and IQR (our "percentile-based" measure of center and spread).  What do you notice?
+
+## Boxplots
+Let's try to visualize the difference we are observing above.  One common visual that relies on "percentile" measurements is a boxplot.  
+
+To make a boxplot in ggplot, we assign one axis aesthetic to the grouping variable (usually `x`), and the other to the quantitative variable (usually `y`). Then, we simply use the geometry `geom_boxplot()`. Try it below!
+
+```{r}
+# Try to write you code from scratch!
+ggplot(data = diamond_compare,
+       aes(x = collection,
+           y = carat))+
+    geom_boxplot()
+```
+
+Yikes! Our boxplot got smushed, but at least we are starting to see what the issue might be.... 
+
+**Exercise**. How many diamonds weigh more than 2.5 carats?
+```{r}
+# nice review, can you write the code?
+
+```
+
+
+**Exercise**. Copy and paste your boxplot code above, but this time add the layer `coord_cartesian(ylim=c(0,2.5))`.  This will refocus the boxplot to only diamonds with weight between 0 and 2.5 carats.  What do you notice?
+```{r}
+ggplot(data = diamond_compare,
+       aes(x = collection,
+           y = carat))+
+    geom_boxplot()+
+    coord_cartesian(ylim=c(0,3))
+```
+
+
+### Challenges!
+
+**Exercise**: 
+Can you create histograms for each in a single plot?
+```{r}
+# write your code here...
+```
+
+Yikes, weird looking histograms. 
+
+**Exercise**.
+Try making the following modifications (yes, I had to play around to get this just right):
+
+* use `bins = 200` and `color="white"` inside the histogram geometry
+* add the layer `coord_cartesian(xlim=c(0,3))`.  (Notice `xlim` and not `ylim` here...)
+
+```{r}
+# copy and paste your code above, add the coord_cartesian() layer
+ggplot(data = diamond_compare,
+       aes(x = carat))+
+    geom_histogram(bins = 200,color="white")+
+    facet_wrap(vars(collection), nrow=2)+
+    coord_cartesian(xlim=c(0,3))
+```
+
+**Exercise.** How much does the "outlier" diamond weigh?
+```{r}
+# Place your code here.
+```
+
+### Final thoughts
+So what's going on with the sample from the Smithsonian collection? I ***hope*** you figure it out.

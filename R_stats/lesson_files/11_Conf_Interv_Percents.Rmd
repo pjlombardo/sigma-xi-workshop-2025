@@ -1,0 +1,138 @@
+---
+title: "Confidence Intervals"
+subtitle: "The Main Idea and Practice With Percents"
+author: "P. Lombardo"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Loading packages, etc.
+```{r}
+library(tidyverse)
+library(patchwork)
+source('source_files/CIs.R')
+```
+
+## Introduction
+In the last lesson, I (hopefully) convinced you that the Central Limit Theorem allows us to replace the computer-intensive process of *simulating a sampling distribution* with a "predicted" normal distribution from the CLT.  Sampling distributions, and hence the normal distribution models we get from the CLT, provide the mathematical bases for the following two statistical techniques:
+
+1. *Hypothesis testing:* we consider a claim and try to provide "probability evidence ***against*** it." Specifically, we assume the claim is true, consider the associated sampling distribution, and then use it to compute the probability of seeing our sample data or something more extreme. We will soon call the "probability evidence" $P$-values, and we generally want them to be small so that we can provide evidence *against* the claim.
+
+2. *Confidence intervals:* rather than testing a claim, we provide an interval guess where we have a high confidence the actual population parameter falls.
+
+Applying the CLT is a little different for each technique, as we saw in the last lesson. In this lesson, we present the main idea behind the *confidence interval technique*, and more clearly draw the connection to sampling distributions (and hence the CLT).
+
+
+## The Confidence Interval Idea
+The idea behind a confidence interval is actually quite intuitive:
+
+> It's easier to catch a fish with a net than your hand.
+
+Let's use the following Shiny simulations to explore this idea:
+
+* [Confidence Interval Simulator For Means](https://stem.endicott.edu/pl-shiny/confidence-intervals/ci-mean-choose-me/)
+
+* [Confidence Interval Simulator For Percentages](https://stem.endicott.edu/pl-shiny/confidence-intervals/ci-perc-choose-me/)
+
+Some theme:
+
+1. Generally speaking, the statistic "guess" we get from a random sample _______ the population parameter. (We generally _______ catch the fish by hand.)
+
+2. Adding a *Margin of Error* to both sides of the statistic guess, our success rate for including the population parameter _________.  (The net is _______ at catching the fish)
+
+3. Using a large margin of error leads to a great success rate, but the interval is ________ informative.  Using a small margin of error leads to a smaller success rate, but the interval is ________ informative.
+
+4. We need to find balance: _______
+
+### Designing our interval to achieve a 95\% success rate
+So it all comes down to choosing a smart *Margin of Error*, and then our confidence interval is simply:
+
+$$(\text{statistic} - \text{ME}, \text{statistic} + \text{ME}).$$
+How can we do this to achieve a 95\% success rate?  We rely on two things:
+
+1. The CLT tells us that the sampling distribution can be modeled by normal distribution where the $\mu$ parameter is our population parameter which we seek, and the $\sigma$ parameter quantifies the sampling variation of our statistics (we will call this **Standard Error*, denoted `SE`).
+
+2. Since the sampling distribution is normal, the empirical rule applies. Here are three ways to state the implications of this fact:
+
+    * 95\% of all random samples lead to a statistic guess that is within two *Standard Errors* (SE) of the actual population parameter.
+    * There is a 95\% chance that a random sample from the population will lead to a statistic guess that is at most two *Standard Errors* (SE) from the population parameter.
+    * **There is a 95\% chance that the population parameter is within two *Standard Errors* (SE) of a statistical guess.**
+
+Visualize the idea here: [Random Samples and their CI](https://stem.endicott.edu/pl-shiny/confidence-intervals/ci-samp-distr-demo/)
+
+So... if we want 95\% of samples to lead to a confidence interval that contains the population parameter, how should we choose the margin of error?
+
+**Answer:**
+
+
+(*Note*: This reasoning is not always easy to digest, but I encourage you to keep working on it until this makes sense and you can explain it casually to non-expert.)
+
+## A Confidence Interval Example For A Percent
+I have no idea what percentage of all Endicott students are from MA, but I did collect a random sample of 35 students where 21 were from MA.
+
+1. What's my best guess for the population percentage?
+
+<answer here>
+
+Now we want to improve our guess, but providing an interval with a 95\% success rate (i.e., a confidence interval as designed above).
+
+The central limit theorem for percentages states the following: 
+
+> Assuming large enough sample sizes, the sampling distribution for sample percentages is normal with a mean of $p$ and a standard error (SE) of $SE = \sqrt{p(1-p)/n}$, where $p$ is the population percentage.
+
+To build our confidence interval, we only need to know the standard error $SE = \sqrt{p(1-p)/n}$, ***but we don't know the population parameter $p$!***
+
+> When sample sizes are large, using the sample percentage $\hat p$ in place of the population parameter $p$ when computing the Standard Error leads to a confidence interval with roughly a 95\% success rate.
+
+In other words, in a pinch we can use $SE = \sqrt{\hat p(1-\hat p)/n}$ as our standard error, and our confidence interval process will still have about a 95\% success rate.  (Verify this idea here: [CI for percents](https://stem.endicott.edu/pl-shiny/confidence-intervals/ci-perc-wald/))
+
+2. What should we use for our standard error for this problem? Remember $\hat p = 21/35 \approx .6$.
+
+```{r}
+#Place code here.
+```
+
+
+3. So what should our confidence interval guess be?
+```{r}
+#place code here.
+
+```
+
+### Confidence Interval Assumptions
+Wait, how do we know if our sample sizes are large enough?  The CLT requires often requires that $np > 10$ and $n(1-p) > 10$. However, *we don't know $p$*, remember?
+
+What do you think we check instead?
+
+**Shortcut**: When working with sample data, it's easy to show that
+
+* The value of $n \hat p$ is just the number of observations that are in our category of interest (like MA residents)
+* The value of $n (1-\hat p)$ is just the number of observations that our *not* in our category of interest (like non-MA residents)
+
+So before running our confidence interval for a sample percent, we just need to check that there are at least 10 observations in each potential category. 
+
+* I usually call this the "10-yes-10-no" requirement.
+
+*Did this assumption hold for our MA residents example?*
+
+### Can we change the success rate?
+Sure. For a 95\% success rate, we use $ME = 2*SE$  (or some more technical textbooks use 1.96 instead of 2).  
+
+* If we want to use a lower success rate, we can just change our multiplier of 2 into something smaller (i.e., shrink our margin of error). 
+* If we want a higher success rate, we can change our multiplier of 2 into something larger (i.e., expand our margin of error).
+
+Change the `multiplier` argument in the command below, and you can run a simulation of 5,000 confidence intervals and have the success rate reported.
+
+```{r}
+wald_success_rate(multiplier = 2)
+```
+
+The multiplier in front of the standard error is often called a *critical value*, and it allows us to adjust our "confidence level" when building a confidence interval.  We will formalize all this soon.
+
+**Technical Note**: The success rate of the process is intimately connected to the percentiles of the normal distribution.  I will not detail the process here, but I'm happy to to discuss it with anyone that's interested during office hours or after class sometime!  It's really neat, and connects with the idea of a sampling distribution.
+
+
+
+
+

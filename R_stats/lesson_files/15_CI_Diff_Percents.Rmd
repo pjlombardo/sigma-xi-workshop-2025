@@ -1,0 +1,207 @@
+---
+title: "Comparing Percentages Between Groups"
+subtitle: "Three is a crowd..."
+author: "P. Lombardo"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Loading packages, etc.
+```{r}
+library(tidyverse)
+library(patchwork)
+library(DescTools)
+library(broom)
+gss<-read.csv('data/gss.csv',header = T, stringsAsFactors = T)
+bps_sample<-read.csv('data/bps_sample.csv', header = T,
+                     stringsAsFactors = T)
+```
+
+
+In our previous lesson, we explored how to compare population means between two different groups using confidence intervals.  In this lesson, we'll do the same but focus on comparing populations by looking at percentages as a summary statistic.
+
+There are just a few main differences:
+
+1. Our testing assumptions are different, so we need to keep that in mind.
+2. We will use `BinomDiffCI()` from the `DescTools` package to run our confidence intervals. 
+    * *Note*: like `BinomCI()`, this has us summarize our data in a `table()` first, and then plug in values. (There is a more streamlined way, but...)
+
+
+## The `gss` data set
+The `gss` data frame we loaded above gives information from the General Social Survey:
+
+> "The General Social Survey is a high-quality survey which gathers data on American society and opinions, conducted since 1972." - from the `infer` package documentation.
+
+
+Let's explore differences in the percentages of college degree holders among men and women, but let's restrict our years to before 1990.
+
+0. How must we prepare our data?
+```{r}
+# place code here.
+```
+
+1. Are Men or Women the "Group 1" for this analysis? 
+```{r}
+
+```
+
+*What parameter are we estimating? (Make the order clear.)*
+
+
+2. Do we satisfy the assumptions of this test?
+    * Here we will check the "10-yes-10-no" condition *in both groups*!
+```{r}
+#place code here
+
+```
+
+
+3. Run the confidence interval using `BinomDiffCI()` with the "wald" method.
+```{r}
+# table first
+
+
+# Use BinomDiffCI() fill in by group
+
+```
+(For fun, try some of the other methods!)
+
+4. Interpret this confidence interval. What does it mean?
+
+* Which group was "Group 1"? How does that affect our interpretation?
+
+<answer here>
+
+
+## Return to Police Stops
+In `bps_sample`, we loaded a random 500 stops from the much larger Boston Police Stops data set we worked with earlier in the semester.
+
+This is a "wilder" data set, so we have to do a little more preparation to get some of our code to work.  Below, we'll introduce some modifications we may need from time to time, including:
+
+* `droplevels()`, which is sometimes necessary after a `filter()` command.
+
+Let's work our way through an example.
+
+### Are Females more Likely to be pulled over during the day?
+
+
+0. Create a 100\%-stacked bar plot to compare Time of Day percentages between Men and Women. 
+
+*Show Work Below:*
+
+
+```{r}
+#place code here.
+```
+
+
+There are too many categories, so as a research I want to make the following modifications:
+
+* Look only at observations that were definitively categorized as Male and Female.
+* Let's combine the levels "EarlyMorning" and "Nighttime" into a single level, making that variable a binary one.
+
+Prepare the data:
+```{r}
+# Place code here.
+
+# Filter to include only female/male, then droplevels
+
+# use mutate to create new variable is_day with only two levels.
+
+# Select the two variables we need.
+
+```
+
+
+1. Is Male or Female the "Group 1" for this analysis? 
+```{r}
+
+```
+
+*What parameter are we estimating? (Make the order clear.)*
+
+2. Do we satisfy the assumptions of this test?
+    * Here we will check the "10-yes-10-no" condition *in both groups*!
+```{r}
+#place code here
+
+```
+
+
+3. Run the confidence interval using `BinomDiffCI()` with the "wald" method.
+```{r}
+# table first
+
+
+# Use BinomDiffCI() fill in by group
+
+```
+
+4. Write a clear conclusion:
+
+
+
+**Important additions:**
+
+* If we `filter()` out certain levels of a categorical variable, it might be agood ideas to droplevels() when preparing your data frame.
+* To combine levels together, we use `mutate()` to create a new variable.
+
+
+### One More Example:
+Does Age Group have an association with whether one gets Frisked/Searched?
+
+0. Create a 100\%-stacked bar plot to compare and explore these variables. 
+
+*Show Work Below:*
+
+
+```{r}
+#place code here.
+```
+
+
+Thoughts:
+
+* Let's combine "Seniors" and "Adults" into one category of "Adult".
+* Let's drop rows where either Age group or Frisk is "Unknown"
+
+Prepare the data:
+```{r}
+# Place code here.
+
+```
+
+
+1. Is Minor or Adult the "Group 1" for this analysis? 
+```{r}
+
+```
+
+*What parameter are we estimating? (Make the order clear.)*
+
+2. Do we satisfy the assumptions of this test?
+    * Here we will check the "10-yes-10-no" condition *in both groups*!
+```{r}
+#place code here
+
+```
+
+
+3. Run the confidence interval using `BinomDiffCI()` with the "scorecc" method.
+```{r}
+# Table first
+
+
+# Use BinomDiffCI() fill in by group
+
+```
+
+4. Write a clear conclusion:
+
+
+5. Visualize again!
+```{r}
+# Place code for a plot here.
+```
+
